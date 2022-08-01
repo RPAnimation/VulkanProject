@@ -4,7 +4,12 @@ project(vulkan_project LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(vulkan REQUIRED FATAL_ERROR)
+if(APPLE)
+    find_package(vulkan REQUIRED FATAL_ERROR)
+else()
+    find_package(Vulkan REQUIRED FATAL_ERROR)
+endif()
+
 find_package(glfw3 REQUIRED FATAL_ERROR)
 find_package(glm REQUIRED FATAL_ERROR)
 
