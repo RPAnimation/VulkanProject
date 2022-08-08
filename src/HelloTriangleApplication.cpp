@@ -1,5 +1,6 @@
 #include "HelloTriangleApplication.hpp"
 
+
 void HelloTriangleApplication::run()
 {
     initWindow();
@@ -10,9 +11,14 @@ void HelloTriangleApplication::run()
 
 void HelloTriangleApplication::initWindow()
 {
+    glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     window = glfwCreateWindow(HEIGHT, WIDTH, "Vulkan", nullptr, nullptr);
+    if (window == NULL)
+    {
+        std::cout << "GLFW: Couldn't create window!\n";
+    }
 }
 
 void HelloTriangleApplication::initVulkan()

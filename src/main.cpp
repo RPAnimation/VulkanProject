@@ -1,13 +1,5 @@
 #include "HelloTriangleApplication.hpp"
 
-
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-
-#include <glm/mat4x4.hpp>
-#include <glm/vec4.hpp>
-#include <iostream>
-#include <vulkan/vulkan.hpp>
-
 int main()
 {
     HelloTriangleApplication app;
