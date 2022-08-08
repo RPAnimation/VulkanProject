@@ -14,7 +14,8 @@ find_package(glfw3 REQUIRED FATAL_ERROR)
 find_package(glm REQUIRED FATAL_ERROR)
 
 set(EXEC_SOURCES
-	main.cpp
+	src/main.cpp
+	src/HelloTriangleApplication.cpp
 )
 
 add_executable(${PROJECT_NAME} ${EXEC_SOURCES})
