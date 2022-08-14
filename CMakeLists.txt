@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.23.2)
 project(vulkan_project LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE__CXX_FLAGS "-Wall -O2")
 
 if(APPLE)
     find_package(vulkan REQUIRED FATAL_ERROR)
