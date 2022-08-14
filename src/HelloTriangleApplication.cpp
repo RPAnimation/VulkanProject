@@ -55,6 +55,21 @@ void HelloTriangleApplication::createInstance()
     {
         throw std::runtime_error("Failed to create instance!");
     }
+
+    uint32_t vkExtensionCount = 0;
+
+    vkEnumerateInstanceExtensionProperties(nullptr, &vkExtensionCount, nullptr);
+
+    std::vector<VkExtensionProperties> extensions(vkExtensionCount);
+
+    vkEnumerateInstanceExtensionProperties(nullptr, &vkExtensionCount, extensions.data());
+
+    std::cout << vkExtensionCount << " Available extensions:\n";
+
+    for (const auto &extension : extensions)
+    {
+        std::cout << "\t" << extension.extensionName << "\n";
+    }
 }
 void HelloTriangleApplication::mainLoop()
 {
@@ -65,6 +80,7 @@ void HelloTriangleApplication::mainLoop()
 }
 void HelloTriangleApplication::cleanup()
 {
+    vkDestroyInstance(instance, nullptr);
     glfwDestroyWindow(window);
     glfwTerminate();
 }
