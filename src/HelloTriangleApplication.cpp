@@ -1,5 +1,5 @@
 #include "HelloTriangleApplication.hpp"
-#include "vulkanutils.h"
+#include "VulkanUtils.hpp"
 
 void HelloTriangleApplication::run()
 {

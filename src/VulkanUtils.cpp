@@ -1,4 +1,4 @@
-#include "vulkanutils.h"
+#include "VulkanUtils.hpp"
 
 struct error_codes global_error_codes[] = {
     { VK_SUCCESS, "VK_SUCCESS" },
