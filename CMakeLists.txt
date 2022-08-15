@@ -17,6 +17,7 @@ find_package(glm REQUIRED FATAL_ERROR)
 set(EXEC_SOURCES
 	src/main.cpp
 	src/HelloTriangleApplication.cpp
+        src/vulkanutils.cpp
 )
 
 add_executable(${PROJECT_NAME} ${EXEC_SOURCES})
