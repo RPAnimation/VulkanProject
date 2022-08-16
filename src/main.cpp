@@ -4,7 +4,7 @@ int main()
 {
     HelloTriangleApplication app;
 
-    try
+	try
     {
         app.run();
     }
