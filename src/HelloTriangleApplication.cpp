@@ -33,44 +33,60 @@ void HelloTriangleApplication::createInstance()
     appInfo.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pApplicationName   = APP_NAME;
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.pEngineName        = ENGINE_NAME;
-    appInfo.engineVersion      = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.apiVersion         = VK_API_VERSION_1_0;
+	appInfo.pEngineName        = ENGINE_NAME;
+	appInfo.engineVersion      = VK_MAKE_VERSION(1, 0, 0);
+	appInfo.apiVersion         = VK_API_VERSION_1_0;
 
-    VkInstanceCreateInfo createInfo{};
+	VkInstanceCreateInfo createInfo{};
 
-    createInfo.sType            = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    createInfo.pApplicationInfo = &appInfo;
+	createInfo.sType            = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+	createInfo.pApplicationInfo = &appInfo;
 
-    uint32_t     glfwExtensionCount = 0;
-    const char **glfwExtensions     = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+	uint32_t     glfwExtensionCount = 0;
+	const char **glfwExtensions     = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
-    createInfo.enabledExtensionCount   = glfwExtensionCount;
-    createInfo.ppEnabledExtensionNames = glfwExtensions;
+	createInfo.enabledExtensionCount   = glfwExtensionCount;
+	createInfo.ppEnabledExtensionNames = glfwExtensions;
 
-    createInfo.enabledLayerCount = 0;
+	createInfo.enabledLayerCount = 0;
 
-    VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);
+	VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);
 
-    if (result != VK_SUCCESS)
-    {
-        throw std::runtime_error(err2msg(result));
-    }
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
 
-    uint32_t vkExtensionCount = 0;
+	uint32_t vkExtensionCount = 0;
 
-    vkEnumerateInstanceExtensionProperties(nullptr, &vkExtensionCount, nullptr);
+	vkEnumerateInstanceExtensionProperties(nullptr, &vkExtensionCount, nullptr);
 
-    std::vector<VkExtensionProperties> extensions(vkExtensionCount);
+	std::vector<VkExtensionProperties> extensions(vkExtensionCount);
 
-    vkEnumerateInstanceExtensionProperties(nullptr, &vkExtensionCount, extensions.data());
+	vkEnumerateInstanceExtensionProperties(nullptr, &vkExtensionCount, extensions.data());
 
-    std::cout << vkExtensionCount << " Available extensions:\n";
+	std::cout << vkExtensionCount << " Available extensions:\n";
 
-    for (const auto &extension : extensions)
-    {
-        std::cout << "\t" << extension.extensionName << "\n";
-    }
+	for (const auto &extension : extensions)
+	{
+		std::cout << "\t" << extension.extensionName << "\n";
+	}
+
+	if (enableValidationLayers && !checkValidationLayerSupport(validationLayers))
+	{
+		throw std::runtime_error("Validation layers not available!");
+	}
+	if (enableValidationLayers)
+	{
+		createInfo.enabledLayerCount   = static_cast<uint32_t>(validationLayers.size());
+		createInfo.ppEnabledLayerNames = validationLayers.data();
+		std::cout << "Validation layers enabled.\n ";
+	}
+	else
+	{
+		createInfo.enabledLayerCount = 0;
+		std::cout << "Validation layers disabled.\n ";
+	}
 }
 void HelloTriangleApplication::mainLoop()
 {

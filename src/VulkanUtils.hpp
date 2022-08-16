@@ -3,9 +3,9 @@
 
 #include <vulkan/vulkan.hpp>
 
-#ifndef NDEBUG
+#ifdef NDEBUG
 const bool enableValidationLayers = false;
-#elif
+#else
 const bool enableValidationLayers = true;
 #endif
 
@@ -16,6 +16,6 @@ struct error_codes {
 
 const char* err2msg(int code);
 
-bool checkValidationLayerSupport();
+bool checkValidationLayerSupport(const std::vector<const char*>& validationLayers);
 
 #endif

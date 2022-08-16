@@ -1,6 +1,6 @@
 #include "VulkanUtils.hpp"
 
-struct error_codes global_error_codes[] = {
+const struct error_codes global_error_codes[] = {
     {VK_SUCCESS, "VK_SUCCESS"},
     {VK_NOT_READY, "VK_NOT_READY"},
     {VK_TIMEOUT, "VK_TIMEOUT"},
@@ -33,7 +33,32 @@ const char *err2msg(int code)
 	return "Unknown error";
 }
 
-bool checkValidationLayerSupport()
+bool checkValidationLayerSupport(const std::vector<const char *> &validationLayers)
 {
+	uint32_t layerCount = 0;
+	vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+	std::vector<VkLayerProperties> availableLayers(layerCount);
+
+	vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+	for (char const *layerName : validationLayers)
+	{
+		bool isFound = false;
+
+		for (const VkLayerProperties &layerProperties : availableLayers)
+		{
+			if (layerName != layerProperties.layerName)
+			{
+				isFound = true;
+				break;
+			}
+		}
+		if (!isFound)
+		{
+			return false;
+		}
+	}
+
 	return true;
 }
