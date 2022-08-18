@@ -1,15 +1,14 @@
 #ifndef __HELLO_TRIANGLE_APPLICAITON
 #define __HELLO_TRIANGLE_APPLICAITON
 
-#include <vulkan/vulkan.h>
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+#include <vulkan/vulkan.hpp>
 
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
-
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 
 class HelloTriangleApplication
 {
@@ -23,12 +22,21 @@ public:
 private:
     GLFWwindow* window;
     VkInstance instance;
+    VkDebugUtilsMessengerEXT debugMessanger;
 
     void initVulkan();
     void createInstance();
+    void setupDebugMessanger();
     void initWindow();
     void mainLoop();
     void cleanup();
+
+    static VKAPI_ATTR VkBool32 VKAPI_CALL
+    debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                  VkDebugUtilsMessageTypeFlagsEXT messageType,
+                  const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+                  void* pUserData);
+    bool checkValidationLayerSupport();
 };
 
 #endif

@@ -1,6 +1,8 @@
 #ifndef VULKANUTILS_H
 #define VULKANUTILS_H
 
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
 #include <vulkan/vulkan.hpp>
 
 #ifdef NDEBUG
@@ -15,7 +17,14 @@ struct error_codes {
 };
 
 const char* err2msg(int code);
-
-bool checkValidationLayerSupport(const std::vector<const char*>& validationLayers);
-
+std::vector<const char*> getRequiredExtensions();
+VkResult CreateDebugUtilsMessengerEXT(VkInstance instance,
+                                      const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
+                                      const VkAllocationCallbacks* pAllocator,
+                                      VkDebugUtilsMessengerEXT* pDebugMessenger);
+void DestroyDebugUtilsMessengerEXT(VkInstance instance,
+                                   VkDebugUtilsMessengerEXT debugMessenger,
+                                   const VkAllocationCallbacks* pAllocator);
+void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo,
+                                      PFN_vkDebugUtilsMessengerCallbackEXT debugCallback);
 #endif
