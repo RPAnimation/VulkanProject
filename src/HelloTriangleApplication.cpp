@@ -25,6 +25,7 @@ void HelloTriangleApplication::initVulkan()
 {
     createInstance();
 	setupDebugMessanger();
+	pickPhysicalDevice();
 }
 
 void HelloTriangleApplication::createInstance()
@@ -104,6 +105,35 @@ void HelloTriangleApplication::setupDebugMessanger()
 	if (result != VK_SUCCESS)
 	{
 		throw std::runtime_error(err2msg(result));
+	}
+}
+
+void HelloTriangleApplication::pickPhysicalDevice()
+{
+	uint32_t deviceCount = 0;
+
+	vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+
+	if (deviceCount < 1)
+	{
+		throw std::runtime_error("No devices available!");
+	}
+
+	std::vector<VkPhysicalDevice> devices(deviceCount);
+
+	vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+
+	for (const VkPhysicalDevice &device : devices)
+	{
+		if (isSuitablePhysicalDevice(device))
+		{
+			physicalDevice = device;
+			break;
+		}
+	}
+	if (physicalDevice == VK_NULL_HANDLE)
+	{
+		throw std::runtime_error("No supported devices found!");
 	}
 }
 void HelloTriangleApplication::mainLoop()

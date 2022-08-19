@@ -90,3 +90,14 @@ void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT  &creat
 	createInfo.pfnUserCallback = debugCallback;
 	createInfo.pUserData       = nullptr;
 }
+
+bool isSuitablePhysicalDevice(const VkPhysicalDevice &device)
+{
+	VkPhysicalDeviceProperties deviceProperties;
+	VkPhysicalDeviceFeatures   deviceFeatures;
+
+	vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+	vkGetPhysicalDeviceProperties(device, &deviceProperties);
+
+	return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU && deviceFeatures.geometryShader;
+}

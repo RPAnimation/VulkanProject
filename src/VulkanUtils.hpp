@@ -27,4 +27,7 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance,
                                    const VkAllocationCallbacks* pAllocator);
 void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo,
                                       PFN_vkDebugUtilsMessengerCallbackEXT debugCallback);
+
+bool isSuitablePhysicalDevice(const VkPhysicalDevice& device);
+
 #endif
