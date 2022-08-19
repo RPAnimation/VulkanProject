@@ -24,6 +24,7 @@ void HelloTriangleApplication::initWindow()
 void HelloTriangleApplication::initVulkan()
 {
     createInstance();
+	setupDebugMessanger();
 }
 
 void HelloTriangleApplication::createInstance()

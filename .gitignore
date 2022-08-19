@@ -17,3 +17,6 @@ _deps
 # ADDITIONAL
 build/
 .vscode
+
+# VULKAN
+*.html
