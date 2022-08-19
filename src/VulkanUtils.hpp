@@ -3,6 +3,7 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include <optional>
 #include <vulkan/vulkan.hpp>
 
 #ifdef NDEBUG
@@ -14,6 +15,13 @@ const bool enableValidationLayers = true;
 struct error_codes {
     int value;
     const char* name;
+};
+
+struct QueueFamiliyIndices
+{
+    std::optional<uint32_t> graphicsFamily;
+
+    bool isComplete() { return graphicsFamily.has_value(); }
 };
 
 const char* err2msg(int code);
@@ -29,5 +37,7 @@ void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& create
                                       PFN_vkDebugUtilsMessengerCallbackEXT debugCallback);
 
 bool isSuitablePhysicalDevice(const VkPhysicalDevice& device);
+
+QueueFamiliyIndices findQueueFamilies(VkPhysicalDevice device);
 
 #endif

@@ -93,11 +93,41 @@ void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT  &creat
 
 bool isSuitablePhysicalDevice(const VkPhysicalDevice &device)
 {
+	QueueFamiliyIndices        indices = findQueueFamilies(device);
 	VkPhysicalDeviceProperties deviceProperties;
 	VkPhysicalDeviceFeatures   deviceFeatures;
 
 	vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 	vkGetPhysicalDeviceProperties(device, &deviceProperties);
 
-	return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU && deviceFeatures.geometryShader;
+	return (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU ||
+	        deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) &&
+	       deviceFeatures.geometryShader &&
+	       indices.isComplete();
+}
+
+QueueFamiliyIndices findQueueFamilies(VkPhysicalDevice device)
+{
+	QueueFamiliyIndices indices;
+	uint32_t            queueFamilyCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+	std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+	int i = 0;
+	for (const auto &family : queueFamilies)
+	{
+		if (family.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+		{
+			indices.graphicsFamily = i;
+		}
+		if (indices.isComplete())
+		{
+			break;
+		}
+		i++;
+	}
+	return indices;
 }
