@@ -26,6 +26,7 @@ void HelloTriangleApplication::initVulkan()
     createInstance();
 	setupDebugMessanger();
 	pickPhysicalDevice();
+	createLogicalDevice();
 }
 
 void HelloTriangleApplication::createInstance()
@@ -136,6 +137,40 @@ void HelloTriangleApplication::pickPhysicalDevice()
 		throw std::runtime_error("No supported devices found!");
 	}
 }
+
+void HelloTriangleApplication::createLogicalDevice()
+{
+	QueueFamiliyIndices     indices = findQueueFamilies(physicalDevice);
+	VkDeviceQueueCreateInfo queueCreateInfo{};
+	queueCreateInfo.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+	queueCreateInfo.queueCount       = 1;
+	float queuePriority              = 1.0;
+	queueCreateInfo.pQueuePriorities = &queuePriority;
+	VkPhysicalDeviceFeatures physicalDeviceFeatures{};
+	VkDeviceCreateInfo       deviceCreateInfo{};
+	deviceCreateInfo.sType                 = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	deviceCreateInfo.pQueueCreateInfos     = &queueCreateInfo;
+	deviceCreateInfo.queueCreateInfoCount  = 1;
+	deviceCreateInfo.pEnabledFeatures      = &physicalDeviceFeatures;
+	deviceCreateInfo.enabledExtensionCount = 0;
+
+	if (enableValidationLayers)
+	{
+		deviceCreateInfo.enabledLayerCount   = (uint32_t) validationLayers.size();
+		deviceCreateInfo.ppEnabledLayerNames = validationLayers.data();
+	}
+	else
+	{
+		deviceCreateInfo.enabledLayerCount = 0;
+	}
+	VkResult result = vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &logicalDevice);
+
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
+}
 void HelloTriangleApplication::mainLoop()
 {
     while (!glfwWindowShouldClose(window))
@@ -149,6 +184,7 @@ void HelloTriangleApplication::cleanup()
 	{
 		DestroyDebugUtilsMessengerEXT(instance, debugMessanger, nullptr);
 	}
+	vkDestroyDevice(logicalDevice, nullptr);
 	vkDestroyInstance(instance, nullptr);
 	glfwDestroyWindow(window);
 	glfwTerminate();

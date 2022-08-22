@@ -24,21 +24,27 @@ private:
     VkInstance instance;
     VkDebugUtilsMessengerEXT debugMessanger;
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+    VkDevice logicalDevice = VK_NULL_HANDLE;
 
-    void initVulkan();
-    void createInstance();
-    void setupDebugMessanger();
-    void pickPhysicalDevice();
+    // Main phase
     void initWindow();
     void mainLoop();
     void cleanup();
 
+    // Vulkan phase
+    void initVulkan();
+    void createInstance();
+    void setupDebugMessanger();
+    void pickPhysicalDevice();
+    void createLogicalDevice();
+
+    // Support functions
+    bool checkValidationLayerSupport();
     static VKAPI_ATTR VkBool32 VKAPI_CALL
     debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                   VkDebugUtilsMessageTypeFlagsEXT messageType,
                   const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
                   void* pUserData);
-    bool checkValidationLayerSupport();
 };
 
 #endif
