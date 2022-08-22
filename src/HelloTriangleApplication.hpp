@@ -25,6 +25,7 @@ private:
     VkDebugUtilsMessengerEXT debugMessanger;
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
     VkDevice logicalDevice = VK_NULL_HANDLE;
+    VkQueue graphicsQueue;
 
     // Main phase
     void initWindow();

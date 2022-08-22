@@ -170,6 +170,8 @@ void HelloTriangleApplication::createLogicalDevice()
 	{
 		throw std::runtime_error(err2msg(result));
 	}
+
+	vkGetDeviceQueue(logicalDevice, indices.graphicsFamily.value(), 0, &graphicsQueue);
 }
 void HelloTriangleApplication::mainLoop()
 {
