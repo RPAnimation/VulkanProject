@@ -20,8 +20,9 @@ struct error_codes {
 struct QueueFamiliyIndices
 {
     std::optional<uint32_t> graphicsFamily;
+    std::optional<uint32_t> presentFamily;
 
-    bool isComplete() { return graphicsFamily.has_value(); }
+    bool isComplete() { return graphicsFamily.has_value() && presentFamily.has_value(); }
 };
 
 const char* err2msg(int code);
@@ -36,8 +37,8 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance,
 void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo,
                                       PFN_vkDebugUtilsMessengerCallbackEXT debugCallback);
 
-bool isSuitablePhysicalDevice(const VkPhysicalDevice& device);
+bool isSuitablePhysicalDevice(const VkPhysicalDevice device, const VkSurfaceKHR surface);
 
-QueueFamiliyIndices findQueueFamilies(VkPhysicalDevice device);
+QueueFamiliyIndices findQueueFamilies(const VkPhysicalDevice device, const VkSurfaceKHR surface);
 
 #endif

@@ -91,9 +91,9 @@ void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT  &creat
 	createInfo.pUserData       = nullptr;
 }
 
-bool isSuitablePhysicalDevice(const VkPhysicalDevice &device)
+bool isSuitablePhysicalDevice(const VkPhysicalDevice device, const VkSurfaceKHR surface)
 {
-	QueueFamiliyIndices        indices = findQueueFamilies(device);
+	QueueFamiliyIndices        indices = findQueueFamilies(device, surface);
 	VkPhysicalDeviceProperties deviceProperties;
 	VkPhysicalDeviceFeatures   deviceFeatures;
 
@@ -106,7 +106,7 @@ bool isSuitablePhysicalDevice(const VkPhysicalDevice &device)
 	       indices.isComplete();
 }
 
-QueueFamiliyIndices findQueueFamilies(VkPhysicalDevice device)
+QueueFamiliyIndices findQueueFamilies(const VkPhysicalDevice device, const VkSurfaceKHR surface)
 {
 	QueueFamiliyIndices indices;
 	uint32_t            queueFamilyCount = 0;
@@ -122,6 +122,12 @@ QueueFamiliyIndices findQueueFamilies(VkPhysicalDevice device)
 		if (family.queueFlags & VK_QUEUE_GRAPHICS_BIT)
 		{
 			indices.graphicsFamily = i;
+		}
+		VkBool32 presentSupport = false;
+		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+		if (presentSupport)
+		{
+			indices.presentFamily = i;
 		}
 		if (indices.isComplete())
 		{

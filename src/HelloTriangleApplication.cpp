@@ -25,6 +25,7 @@ void HelloTriangleApplication::initVulkan()
 {
     createInstance();
 	setupDebugMessanger();
+	createSurface();
 	pickPhysicalDevice();
 	createLogicalDevice();
 }
@@ -109,6 +110,15 @@ void HelloTriangleApplication::setupDebugMessanger()
 	}
 }
 
+void HelloTriangleApplication::createSurface()
+{
+	VkResult result = glfwCreateWindowSurface(instance, window, nullptr, &surface);
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
+}
+
 void HelloTriangleApplication::pickPhysicalDevice()
 {
 	uint32_t deviceCount = 0;
@@ -126,7 +136,7 @@ void HelloTriangleApplication::pickPhysicalDevice()
 
 	for (const VkPhysicalDevice &device : devices)
 	{
-		if (isSuitablePhysicalDevice(device))
+		if (isSuitablePhysicalDevice(device, surface))
 		{
 			physicalDevice = device;
 			break;
@@ -140,7 +150,7 @@ void HelloTriangleApplication::pickPhysicalDevice()
 
 void HelloTriangleApplication::createLogicalDevice()
 {
-	QueueFamiliyIndices     indices = findQueueFamilies(physicalDevice);
+	QueueFamiliyIndices     indices = findQueueFamilies(physicalDevice, surface);
 	VkDeviceQueueCreateInfo queueCreateInfo{};
 	queueCreateInfo.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 	queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
@@ -187,6 +197,7 @@ void HelloTriangleApplication::cleanup()
 		DestroyDebugUtilsMessengerEXT(instance, debugMessanger, nullptr);
 	}
 	vkDestroyDevice(logicalDevice, nullptr);
+	vkDestroySurfaceKHR(instance, surface, nullptr);
 	vkDestroyInstance(instance, nullptr);
 	glfwDestroyWindow(window);
 	glfwTerminate();

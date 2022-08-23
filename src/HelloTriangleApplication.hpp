@@ -26,6 +26,7 @@ private:
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
     VkDevice logicalDevice = VK_NULL_HANDLE;
     VkQueue graphicsQueue;
+    VkSurfaceKHR surface;
 
     // Main phase
     void initWindow();
@@ -36,6 +37,7 @@ private:
     void initVulkan();
     void createInstance();
     void setupDebugMessanger();
+    void createSurface();
     void pickPhysicalDevice();
     void createLogicalDevice();
 
