@@ -1,6 +1,8 @@
 #include "HelloTriangleApplication.hpp"
 #include "VulkanUtils.hpp"
 
+#include <set>
+
 void HelloTriangleApplication::run()
 {
     initWindow();
@@ -150,18 +152,27 @@ void HelloTriangleApplication::pickPhysicalDevice()
 
 void HelloTriangleApplication::createLogicalDevice()
 {
-	QueueFamiliyIndices     indices = findQueueFamilies(physicalDevice, surface);
-	VkDeviceQueueCreateInfo queueCreateInfo{};
-	queueCreateInfo.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
-	queueCreateInfo.queueCount       = 1;
-	float queuePriority              = 1.0;
-	queueCreateInfo.pQueuePriorities = &queuePriority;
+	QueueFamiliyIndices indices = findQueueFamilies(physicalDevice, surface);
+
+	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+	std::set<uint32_t>                   uniqueQueueFamilies = {indices.graphicsFamily.has_value(), indices.presentFamily.has_value()};
+
+	float queuePriority = 1.0;
+	for (uint32_t queueFamily : uniqueQueueFamilies)
+	{
+		VkDeviceQueueCreateInfo queueCreateInfo{};
+		queueCreateInfo.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queueCreateInfo.queueFamilyIndex = queueFamily;
+		queueCreateInfo.queueCount       = 1;
+		queueCreateInfo.pQueuePriorities = &queuePriority;
+		queueCreateInfos.push_back(queueCreateInfo);
+	}
+
 	VkPhysicalDeviceFeatures physicalDeviceFeatures{};
 	VkDeviceCreateInfo       deviceCreateInfo{};
 	deviceCreateInfo.sType                 = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	deviceCreateInfo.pQueueCreateInfos     = &queueCreateInfo;
-	deviceCreateInfo.queueCreateInfoCount  = 1;
+	deviceCreateInfo.pQueueCreateInfos     = queueCreateInfos.data();
+	deviceCreateInfo.queueCreateInfoCount  = queueCreateInfos.size();
 	deviceCreateInfo.pEnabledFeatures      = &physicalDeviceFeatures;
 	deviceCreateInfo.enabledExtensionCount = 0;
 
@@ -182,6 +193,7 @@ void HelloTriangleApplication::createLogicalDevice()
 	}
 
 	vkGetDeviceQueue(logicalDevice, indices.graphicsFamily.value(), 0, &graphicsQueue);
+	vkGetDeviceQueue(logicalDevice, indices.presentFamily.value(), 0, &presentQueue);
 }
 void HelloTriangleApplication::mainLoop()
 {

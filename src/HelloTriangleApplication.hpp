@@ -27,6 +27,7 @@ private:
     VkDevice logicalDevice = VK_NULL_HANDLE;
     VkQueue graphicsQueue;
     VkSurfaceKHR surface;
+    VkQueue presentQueue;
 
     // Main phase
     void initWindow();
