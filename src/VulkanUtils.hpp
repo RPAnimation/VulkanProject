@@ -28,6 +28,13 @@ struct QueueFamiliyIndices
 
 const std::vector<const char*> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
+struct SwapChainSupportDetails
+{
+    VkSurfaceCapabilitiesKHR capabilities;
+    std::vector<VkSurfaceFormatKHR> formats;
+    std::vector<VkPresentModeKHR> presentModes;
+};
+
 const char* err2msg(int code);
 std::vector<const char*> getRequiredExtensions();
 VkResult CreateDebugUtilsMessengerEXT(VkInstance instance,
@@ -45,5 +52,8 @@ bool isDeviceSuitable(const VkPhysicalDevice device, const VkSurfaceKHR surface)
 QueueFamiliyIndices findQueueFamilies(const VkPhysicalDevice& device, const VkSurfaceKHR& surface);
 
 bool checkDeviceExtensionSupport(const VkPhysicalDevice device);
+
+SwapChainSupportDetails querySwapChainSupport(const VkPhysicalDevice& device,
+                                              const VkSurfaceKHR surface);
 
 #endif

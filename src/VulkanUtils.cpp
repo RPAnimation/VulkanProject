@@ -102,10 +102,17 @@ bool isDeviceSuitable(const VkPhysicalDevice device, const VkSurfaceKHR surface)
 	vkGetPhysicalDeviceProperties(device, &deviceProperties);
 
 	bool isSwapChainSupported = checkDeviceExtensionSupport(device);
+	bool isSwapChainAdequate  = false;
+
+	if (isSwapChainSupported)
+	{
+		SwapChainSupportDetails swapChainDetails = querySwapChainSupport(device, surface);
+		isSwapChainAdequate                      = !swapChainDetails.formats.empty() && !swapChainDetails.presentModes.empty();
+	}
 
 	return (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU ||
 	        deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) &&
-	       deviceFeatures.geometryShader && indices.isComplete() && isSwapChainSupported;
+	       deviceFeatures.geometryShader && indices.isComplete() && isSwapChainSupported && isSwapChainAdequate;
 }
 
 QueueFamiliyIndices findQueueFamilies(const VkPhysicalDevice &device, const VkSurfaceKHR &surface)
@@ -154,4 +161,28 @@ bool checkDeviceExtensionSupport(const VkPhysicalDevice device)
 		requiredExtensions.erase(extension.extensionName);
 	}
 	return requiredExtensions.empty();
+}
+
+SwapChainSupportDetails querySwapChainSupport(const VkPhysicalDevice &device, const VkSurfaceKHR surface)
+{
+	SwapChainSupportDetails details;
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);
+	uint32_t surfaceFormatsCount = 0;
+	vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &surfaceFormatsCount, nullptr);
+
+	if (surfaceFormatsCount != 0)
+	{
+		details.formats.resize(surfaceFormatsCount);
+		vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &surfaceFormatsCount, details.formats.data());
+	}
+
+	uint32_t presentModeCount = 0;
+	vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
+
+	if (presentModeCount != 0)
+	{
+		details.presentModes.resize(presentModeCount);
+		vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentModes.data());
+	}
+	return details;
 }
