@@ -12,7 +12,8 @@ const bool enableValidationLayers = false;
 const bool enableValidationLayers = true;
 #endif
 
-struct error_codes {
+struct error_codes
+{
     int value;
     const char* name;
 };
@@ -24,6 +25,8 @@ struct QueueFamiliyIndices
 
     bool isComplete() { return graphicsFamily.has_value() && presentFamily.has_value(); }
 };
+
+const std::vector<const char*> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
 const char* err2msg(int code);
 std::vector<const char*> getRequiredExtensions();
@@ -37,8 +40,10 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance,
 void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo,
                                       PFN_vkDebugUtilsMessengerCallbackEXT debugCallback);
 
-bool isSuitablePhysicalDevice(const VkPhysicalDevice device, const VkSurfaceKHR surface);
+bool isDeviceSuitable(const VkPhysicalDevice device, const VkSurfaceKHR surface);
 
 QueueFamiliyIndices findQueueFamilies(const VkPhysicalDevice& device, const VkSurfaceKHR& surface);
+
+bool checkDeviceExtensionSupport(const VkPhysicalDevice device);
 
 #endif

@@ -1,4 +1,5 @@
 #include "VulkanUtils.hpp"
+#include <set>
 
 const struct error_codes global_error_codes[] = {
     {VK_SUCCESS, "VK_SUCCESS"},
@@ -91,7 +92,7 @@ void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT  &creat
 	createInfo.pUserData       = nullptr;
 }
 
-bool isSuitablePhysicalDevice(const VkPhysicalDevice device, const VkSurfaceKHR surface)
+bool isDeviceSuitable(const VkPhysicalDevice device, const VkSurfaceKHR surface)
 {
 	QueueFamiliyIndices        indices = findQueueFamilies(device, surface);
 	VkPhysicalDeviceProperties deviceProperties;
@@ -100,10 +101,11 @@ bool isSuitablePhysicalDevice(const VkPhysicalDevice device, const VkSurfaceKHR 
 	vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 	vkGetPhysicalDeviceProperties(device, &deviceProperties);
 
+	bool isSwapChainSupported = checkDeviceExtensionSupport(device);
+
 	return (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU ||
 	        deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) &&
-	       deviceFeatures.geometryShader &&
-	       indices.isComplete();
+	       deviceFeatures.geometryShader && indices.isComplete() && isSwapChainSupported;
 }
 
 QueueFamiliyIndices findQueueFamilies(const VkPhysicalDevice &device, const VkSurfaceKHR &surface)
@@ -136,4 +138,20 @@ QueueFamiliyIndices findQueueFamilies(const VkPhysicalDevice &device, const VkSu
 		i++;
 	}
 	return indices;
+}
+
+bool checkDeviceExtensionSupport(const VkPhysicalDevice device)
+{
+	uint32_t extensionCount = 0;
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+	std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+
+	std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+
+	for (const auto &extension : availableExtensions)
+	{
+		requiredExtensions.erase(extension.extensionName);
+	}
+	return requiredExtensions.empty();
 }
