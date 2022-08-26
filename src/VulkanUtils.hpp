@@ -39,6 +39,6 @@ void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& create
 
 bool isSuitablePhysicalDevice(const VkPhysicalDevice device, const VkSurfaceKHR surface);
 
-QueueFamiliyIndices findQueueFamilies(const VkPhysicalDevice device, const VkSurfaceKHR surface);
+QueueFamiliyIndices findQueueFamilies(const VkPhysicalDevice& device, const VkSurfaceKHR& surface);
 
 #endif

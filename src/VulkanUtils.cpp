@@ -106,7 +106,7 @@ bool isSuitablePhysicalDevice(const VkPhysicalDevice device, const VkSurfaceKHR 
 	       indices.isComplete();
 }
 
-QueueFamiliyIndices findQueueFamilies(const VkPhysicalDevice device, const VkSurfaceKHR surface)
+QueueFamiliyIndices findQueueFamilies(const VkPhysicalDevice &device, const VkSurfaceKHR &surface)
 {
 	QueueFamiliyIndices indices;
 	uint32_t            queueFamilyCount = 0;

@@ -155,7 +155,7 @@ void HelloTriangleApplication::createLogicalDevice()
 	QueueFamiliyIndices indices = findQueueFamilies(physicalDevice, surface);
 
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-	std::set<uint32_t>                   uniqueQueueFamilies = {indices.graphicsFamily.has_value(), indices.presentFamily.has_value()};
+	std::set<uint32_t>                   uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
 	float queuePriority = 1.0;
 	for (uint32_t queueFamily : uniqueQueueFamilies)
@@ -172,7 +172,7 @@ void HelloTriangleApplication::createLogicalDevice()
 	VkDeviceCreateInfo       deviceCreateInfo{};
 	deviceCreateInfo.sType                 = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	deviceCreateInfo.pQueueCreateInfos     = queueCreateInfos.data();
-	deviceCreateInfo.queueCreateInfoCount  = queueCreateInfos.size();
+	deviceCreateInfo.queueCreateInfoCount  = static_cast<uint32_t>(queueCreateInfos.size());
 	deviceCreateInfo.pEnabledFeatures      = &physicalDeviceFeatures;
 	deviceCreateInfo.enabledExtensionCount = 0;
 
