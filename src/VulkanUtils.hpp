@@ -59,4 +59,6 @@ SwapChainSupportDetails querySwapChainSupport(const VkPhysicalDevice& device,
                                               const VkSurfaceKHR surface);
 VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 
+VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
+
 #endif
