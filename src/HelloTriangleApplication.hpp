@@ -28,6 +28,7 @@ private:
     VkQueue graphicsQueue;
     VkSurfaceKHR surface;
     VkQueue presentQueue;
+    VkSwapchainKHR swapChain;
 
     // Main phase
     void initWindow();
@@ -41,6 +42,7 @@ private:
     void createSurface();
     void pickPhysicalDevice();
     void createLogicalDevice();
+    void createSwapChain();
 
     // Support functions
     bool checkValidationLayerSupport();
