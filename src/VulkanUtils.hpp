@@ -26,6 +26,8 @@ struct QueueFamiliyIndices
     bool isComplete() { return graphicsFamily.has_value() && presentFamily.has_value(); }
 };
 
+// SWAP CHAIN SUPPORT CHECK
+
 const std::vector<const char*> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
 struct SwapChainSupportDetails
@@ -55,5 +57,6 @@ bool checkDeviceExtensionSupport(const VkPhysicalDevice device);
 
 SwapChainSupportDetails querySwapChainSupport(const VkPhysicalDevice& device,
                                               const VkSurfaceKHR surface);
+VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 
 #endif

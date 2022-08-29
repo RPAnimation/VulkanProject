@@ -186,3 +186,15 @@ SwapChainSupportDetails querySwapChainSupport(const VkPhysicalDevice &device, co
 	}
 	return details;
 }
+
+VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats)
+{
+	for (const auto &format : availableFormats)
+	{
+		if (format.format == VK_FORMAT_B8G8R8A8_SRGB && format.colorSpace == VK_COLORSPACE_SRGB_NONLINEAR_KHR)
+		{
+			return format;
+		}
+	}
+	return availableFormats[0];
+}
