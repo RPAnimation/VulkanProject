@@ -245,6 +245,13 @@ void HelloTriangleApplication::createSwapChain()
 	{
 		throw std::runtime_error(err2msg(result));
 	}
+
+	uint32_t swapChainImagesCount = 0;
+	vkGetSwapchainImagesKHR(logicalDevice, swapChain, &swapChainImagesCount, nullptr);
+	swapChainImages.resize(swapChainImagesCount);
+	vkGetSwapchainImagesKHR(logicalDevice, swapChain, &swapChainImagesCount, swapChainImages.data());
+	swapChainImageFormat = surfaceFormat.format;
+	swapChainExtent      = extent;
 }
 void HelloTriangleApplication::mainLoop()
 {
