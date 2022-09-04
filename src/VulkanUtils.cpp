@@ -1,4 +1,5 @@
 #include "VulkanUtils.hpp"
+#include <fstream>
 #include <limits>
 #include <set>
 
@@ -227,4 +228,20 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &surfaceCapabilities,
 	actualExtent.height = std::clamp(actualExtent.height, surfaceCapabilities.minImageExtent.height, surfaceCapabilities.maxImageExtent.height);
 
 	return actualExtent;
+}
+
+std::vector<char> readFile(const std::string &filename)
+{
+    std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+    if (!file.is_open())
+    {
+        throw std::runtime_error("Failed to open a file \"" + filename + "\"");
+    }
+    size_t            fileSize = file.tellg();
+    std::vector<char> buffer(fileSize);
+    file.seekg(0);
+    file.read(buffer.data(), fileSize);
+    file.close();
+    return buffer;
 }

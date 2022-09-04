@@ -32,6 +32,7 @@ void HelloTriangleApplication::initVulkan()
 	createLogicalDevice();
 	createSwapChain();
 	createImageViews();
+    createGraphicsPipeline();
 }
 
 void HelloTriangleApplication::createInstance()
@@ -279,7 +280,13 @@ void HelloTriangleApplication::createImageViews()
 		{
 			throw std::runtime_error(err2msg(result));
 		}
-	}
+    }
+}
+
+void HelloTriangleApplication::createGraphicsPipeline()
+{
+    auto vertShaderCode = readFile("shaders/shader.vert.spv");
+    auto fragShaderCode = readFile("shaders/shader.frag.spv");
 }
 void HelloTriangleApplication::mainLoop()
 {
