@@ -245,3 +245,18 @@ std::vector<char> readFile(const std::string &filename)
     file.close();
     return buffer;
 }
+
+VkShaderModule createShaderModule(const VkDevice &device, const std::vector<char> &code)
+{
+	VkShaderModuleCreateInfo createInfo{};
+	createInfo.pCode    = reinterpret_cast<const uint32_t *>(code.data());
+	createInfo.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	createInfo.codeSize = code.size();
+	VkShaderModule shaderModule;
+	VkResult       result = vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule);
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
+	return shaderModule;
+}

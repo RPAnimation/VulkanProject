@@ -285,8 +285,12 @@ void HelloTriangleApplication::createImageViews()
 
 void HelloTriangleApplication::createGraphicsPipeline()
 {
-    auto vertShaderCode = readFile("shaders/shader.vert.spv");
-    auto fragShaderCode = readFile("shaders/shader.frag.spv");
+	auto           vertShaderCode = readFile("shaders/shader.vert.spv");
+	auto           fragShaderCode = readFile("shaders/shader.frag.spv");
+	VkShaderModule vertShader     = createShaderModule(logicalDevice, vertShaderCode);
+	VkShaderModule fragShader     = createShaderModule(logicalDevice, fragShaderCode);
+	vkDestroyShaderModule(logicalDevice, vertShader, nullptr);
+	vkDestroyShaderModule(logicalDevice, fragShader, nullptr);
 }
 void HelloTriangleApplication::mainLoop()
 {
