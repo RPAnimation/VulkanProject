@@ -37,7 +37,7 @@ struct SwapChainSupportDetails
     std::vector<VkPresentModeKHR> presentModes;
 };
 
-const char* err2msg(int code);
+const char* err2msg(VkResult code);
 std::vector<const char*> getRequiredExtensions();
 VkResult CreateDebugUtilsMessengerEXT(VkInstance instance,
                                       const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,

@@ -24,7 +24,7 @@ const struct error_codes global_error_codes[] = {
     {VK_ERROR_FRAGMENTED_POOL, "VK_ERROR_FRAGMENTED_POOL"},
     {VK_ERROR_UNKNOWN, "VK_ERROR_UNKNOWN"}};
 
-const char *err2msg(int code)
+const char *err2msg(VkResult code)
 {
 	for (int i = 0; global_error_codes[i].name; ++i)
 	{
