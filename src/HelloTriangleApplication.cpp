@@ -301,8 +301,9 @@ void HelloTriangleApplication::createRenderPass()
 	colorAttachmentRef.layout     = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
 
 	VkSubpassDescription subpass{};
-	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass.pColorAttachments = &colorAttachmentRef;
+	subpass.pipelineBindPoint    = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.colorAttachmentCount = 1;
+	subpass.pColorAttachments    = &colorAttachmentRef;
 
 	VkRenderPassCreateInfo renderPassCreateInfo{};
 	renderPassCreateInfo.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
@@ -324,8 +325,6 @@ void HelloTriangleApplication::createGraphicsPipeline()
 	auto           fragShaderCode = readFile("shaders/shader.frag.spv");
 	VkShaderModule vertShader     = createShaderModule(logicalDevice, vertShaderCode);
 	VkShaderModule fragShader     = createShaderModule(logicalDevice, fragShaderCode);
-	vkDestroyShaderModule(logicalDevice, vertShader, nullptr);
-	vkDestroyShaderModule(logicalDevice, fragShader, nullptr);
 
 	VkPipelineShaderStageCreateInfo vertShaderStageCreateInfo{};
 	vertShaderStageCreateInfo.sType               = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -437,6 +436,32 @@ void HelloTriangleApplication::createGraphicsPipeline()
 	{
 		throw std::runtime_error(err2msg(result));
 	}
+	VkGraphicsPipelineCreateInfo pipelineCreateInfo{};
+	pipelineCreateInfo.sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	pipelineCreateInfo.stageCount          = 2;
+	pipelineCreateInfo.pStages             = shaderStages;
+	pipelineCreateInfo.pVertexInputState   = &vertexInputStateCreateInfo;
+	pipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
+	pipelineCreateInfo.pViewportState      = &viewportState;
+	pipelineCreateInfo.pRasterizationState = &rasterizer;
+	pipelineCreateInfo.pMultisampleState   = &multisampling;
+	pipelineCreateInfo.pDepthStencilState  = nullptr;
+	pipelineCreateInfo.pColorBlendState    = &colorBlendState;
+	pipelineCreateInfo.pDynamicState       = nullptr;
+
+	pipelineCreateInfo.layout             = pipelineLayout;
+	pipelineCreateInfo.renderPass         = renderPass;
+	pipelineCreateInfo.subpass            = 0;
+	pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
+	pipelineCreateInfo.basePipelineIndex  = -1;
+
+	result = vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &graphicsPipeline);
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
+	vkDestroyShaderModule(logicalDevice, vertShader, nullptr);
+	vkDestroyShaderModule(logicalDevice, fragShader, nullptr);
 }
 
 void HelloTriangleApplication::mainLoop()
@@ -456,6 +481,7 @@ void HelloTriangleApplication::cleanup()
 	{
 		vkDestroyImageView(logicalDevice, imageView, nullptr);
 	}
+	vkDestroyPipeline(logicalDevice, graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(logicalDevice, pipelineLayout, nullptr);
 	vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
 	vkDestroySwapchainKHR(logicalDevice, swapChain, nullptr);
