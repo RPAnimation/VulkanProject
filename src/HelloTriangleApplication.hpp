@@ -38,6 +38,7 @@ private:
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;
     std::vector<VkFramebuffer> swapChainFramebuffers;
+    VkCommandPool commandPool;
 
     // Main phase
     void initWindow();
@@ -56,6 +57,7 @@ private:
     void createRenderPass();
     void createGraphicsPipeline();
     void createFramebuffers();
+    void createCommandPool();
 
     // Support functions
     bool checkValidationLayerSupport();

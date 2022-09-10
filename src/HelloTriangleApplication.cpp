@@ -35,6 +35,7 @@ void HelloTriangleApplication::initVulkan()
 	createRenderPass();
 	createGraphicsPipeline();
 	createFramebuffers();
+	createCommandPool();
 }
 
 void HelloTriangleApplication::createInstance()
@@ -489,6 +490,22 @@ void HelloTriangleApplication::createFramebuffers()
 	}
 }
 
+void HelloTriangleApplication::createCommandPool()
+{
+	QueueFamiliyIndices indices = findQueueFamilies(physicalDevice, surface);
+
+	VkCommandPoolCreateInfo commandPoolCreateInfo = {};
+	commandPoolCreateInfo.sType                   = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	commandPoolCreateInfo.flags                   = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+	commandPoolCreateInfo.queueFamilyIndex        = indices.graphicsFamily.value();
+
+	VkResult result = vkCreateCommandPool(logicalDevice, &commandPoolCreateInfo, nullptr, &commandPool);
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
+}
+
 void HelloTriangleApplication::mainLoop()
 {
 	while (!glfwWindowShouldClose(window))
@@ -498,10 +515,7 @@ void HelloTriangleApplication::mainLoop()
 }
 void HelloTriangleApplication::cleanup()
 {
-	if (enableValidationLayers)
-	{
-		DestroyDebugUtilsMessengerEXT(instance, debugMessanger, nullptr);
-	}
+	vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
 	for (auto buffer : swapChainFramebuffers)
 	{
 		vkDestroyFramebuffer(logicalDevice, buffer, nullptr);
@@ -516,6 +530,10 @@ void HelloTriangleApplication::cleanup()
 	vkDestroySwapchainKHR(logicalDevice, swapChain, nullptr);
 	vkDestroyDevice(logicalDevice, nullptr);
 	vkDestroySurfaceKHR(instance, surface, nullptr);
+	if (enableValidationLayers)
+	{
+		DestroyDebugUtilsMessengerEXT(instance, debugMessanger, nullptr);
+	}
 	vkDestroyInstance(instance, nullptr);
 	glfwDestroyWindow(window);
 	glfwTerminate();
