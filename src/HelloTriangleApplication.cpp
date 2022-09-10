@@ -34,6 +34,7 @@ void HelloTriangleApplication::initVulkan()
 	createImageViews();
 	createRenderPass();
 	createGraphicsPipeline();
+	createFramebuffers();
 }
 
 void HelloTriangleApplication::createInstance()
@@ -464,6 +465,30 @@ void HelloTriangleApplication::createGraphicsPipeline()
 	vkDestroyShaderModule(logicalDevice, fragShader, nullptr);
 }
 
+void HelloTriangleApplication::createFramebuffers()
+{
+	swapChainFramebuffers.resize(swapChainImageViews.size());
+	for (size_t i = 0; i < swapChainImageViews.size(); ++i)
+	{
+		VkImageView attachments[] = {swapChainImageViews[i]};
+
+		VkFramebufferCreateInfo frameBufferCreateInfo{};
+		frameBufferCreateInfo.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		frameBufferCreateInfo.renderPass      = renderPass;
+		frameBufferCreateInfo.attachmentCount = 1;
+		frameBufferCreateInfo.pAttachments    = attachments;
+		frameBufferCreateInfo.width           = swapChainExtent.width;
+		frameBufferCreateInfo.height          = swapChainExtent.height;
+		frameBufferCreateInfo.layers          = 1;
+
+		VkResult result = vkCreateFramebuffer(logicalDevice, &frameBufferCreateInfo, nullptr, &swapChainFramebuffers[i]);
+		if (result != VK_SUCCESS)
+		{
+			throw std::runtime_error(err2msg(result));
+		}
+	}
+}
+
 void HelloTriangleApplication::mainLoop()
 {
 	while (!glfwWindowShouldClose(window))
@@ -476,6 +501,10 @@ void HelloTriangleApplication::cleanup()
 	if (enableValidationLayers)
 	{
 		DestroyDebugUtilsMessengerEXT(instance, debugMessanger, nullptr);
+	}
+	for (auto buffer : swapChainFramebuffers)
+	{
+		vkDestroyFramebuffer(logicalDevice, buffer, nullptr);
 	}
 	for (const auto &imageView : swapChainImageViews)
 	{

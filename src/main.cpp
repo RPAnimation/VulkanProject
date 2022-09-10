@@ -2,10 +2,10 @@
 
 int main()
 {
-    HelloTriangleApplication app;
+	HelloTriangleApplication app;
 
 	try
-    {
+	{
         app.run();
     }
     catch (const std::exception &e)
