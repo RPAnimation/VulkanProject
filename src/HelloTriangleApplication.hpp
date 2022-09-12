@@ -39,6 +39,7 @@ private:
     VkPipeline graphicsPipeline;
     std::vector<VkFramebuffer> swapChainFramebuffers;
     VkCommandPool commandPool;
+    VkCommandBuffer commandBuffer;
 
     // Main phase
     void initWindow();
@@ -58,6 +59,7 @@ private:
     void createGraphicsPipeline();
     void createFramebuffers();
     void createCommandPool();
+    void createCommandBuffer();
 
     // Support functions
     bool checkValidationLayerSupport();
@@ -66,6 +68,7 @@ private:
                   VkDebugUtilsMessageTypeFlagsEXT messageType,
                   const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
                   void* pUserData);
+    void recordCommandBuffer(VkCommandBuffer buffer, uint32_t imageIndex);
 };
 
 #endif

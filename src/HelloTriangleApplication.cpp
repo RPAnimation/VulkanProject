@@ -36,6 +36,7 @@ void HelloTriangleApplication::initVulkan()
 	createGraphicsPipeline();
 	createFramebuffers();
 	createCommandPool();
+	createCommandBuffer();
 }
 
 void HelloTriangleApplication::createInstance()
@@ -506,6 +507,21 @@ void HelloTriangleApplication::createCommandPool()
 	}
 }
 
+void HelloTriangleApplication::createCommandBuffer()
+{
+	VkCommandBufferAllocateInfo allocInfo{};
+	allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocInfo.commandPool        = commandPool;
+	allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocInfo.commandBufferCount = 1;
+
+	VkResult result = vkAllocateCommandBuffers(logicalDevice, &allocInfo, &commandBuffer);
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
+}
+
 void HelloTriangleApplication::mainLoop()
 {
 	while (!glfwWindowShouldClose(window))
@@ -573,4 +589,41 @@ VkBool32 HelloTriangleApplication::debugCallback(VkDebugUtilsMessageSeverityFlag
 {
 	std::cerr << "validation layer: " << pCallbackData->pMessage << "\n";
 	return VK_FALSE;
+}
+
+void HelloTriangleApplication::recordCommandBuffer(VkCommandBuffer buffer, uint32_t imageIndex)
+{
+	VkCommandBufferBeginInfo beginInfo{};
+	beginInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags            = 0;
+	beginInfo.pInheritanceInfo = nullptr;
+
+	VkResult result = vkBeginCommandBuffer(buffer, &beginInfo);
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
+
+	VkRenderPassBeginInfo renderPassBeginInfo{};
+	renderPassBeginInfo.sType             = VK_STRUCTURE_TYPE_DEVICE_GROUP_RENDER_PASS_BEGIN_INFO;
+	renderPassBeginInfo.renderPass        = renderPass;
+	renderPassBeginInfo.framebuffer       = swapChainFramebuffers[imageIndex];
+	renderPassBeginInfo.renderArea.extent = swapChainExtent;
+	renderPassBeginInfo.renderArea.offset = {0, 0};
+
+	VkClearValue clearColor             = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+	renderPassBeginInfo.clearValueCount = 1;
+	renderPassBeginInfo.pClearValues    = &clearColor;
+
+	vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+	vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+
+	vkCmdEndRenderPass(commandBuffer);
+
+	result = vkEndCommandBuffer(commandBuffer);
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
 }
