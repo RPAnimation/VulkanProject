@@ -40,9 +40,13 @@ private:
     std::vector<VkFramebuffer> swapChainFramebuffers;
     VkCommandPool commandPool;
     VkCommandBuffer commandBuffer;
+    VkFence inFlightFence;
+    VkSemaphore imageAvailableSemaphore;
+    VkSemaphore renderFinishedSemaphore;
 
     // Main phase
     void initWindow();
+    void drawFrame();
     void mainLoop();
     void cleanup();
 
@@ -60,6 +64,7 @@ private:
     void createFramebuffers();
     void createCommandPool();
     void createCommandBuffer();
+    void createSyncObjects();
 
     // Support functions
     bool checkValidationLayerSupport();

@@ -23,6 +23,10 @@ void HelloTriangleApplication::initWindow()
 	}
 }
 
+void HelloTriangleApplication::drawFrame()
+{
+}
+
 void HelloTriangleApplication::initVulkan()
 {
 	createInstance();
@@ -37,6 +41,7 @@ void HelloTriangleApplication::initVulkan()
 	createFramebuffers();
 	createCommandPool();
 	createCommandBuffer();
+	createSyncObjects();
 }
 
 void HelloTriangleApplication::createInstance()
@@ -522,15 +527,44 @@ void HelloTriangleApplication::createCommandBuffer()
 	}
 }
 
+void HelloTriangleApplication::createSyncObjects()
+{
+	VkSemaphoreCreateInfo semaphoreCreateInfo{};
+	semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+	VkFenceCreateInfo fenceCreateInfo{};
+	fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+
+	VkResult result = vkCreateSemaphore(logicalDevice, &semaphoreCreateInfo, nullptr, &imageAvailableSemaphore);
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
+	result = vkCreateSemaphore(logicalDevice, &semaphoreCreateInfo, nullptr, &renderFinishedSemaphore);
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
+	result = vkCreateFence(logicalDevice, &fenceCreateInfo, nullptr, &inFlightFence);
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
+}
+
 void HelloTriangleApplication::mainLoop()
 {
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
+		drawFrame();
 	}
 }
 void HelloTriangleApplication::cleanup()
 {
+	vkDestroySemaphore(logicalDevice, imageAvailableSemaphore, nullptr);
+	vkDestroySemaphore(logicalDevice, renderFinishedSemaphore, nullptr);
+	vkDestroyFence(logicalDevice, inFlightFence, nullptr);
+
 	vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
 	for (auto buffer : swapChainFramebuffers)
 	{
