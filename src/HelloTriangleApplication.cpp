@@ -25,6 +25,47 @@ void HelloTriangleApplication::initWindow()
 
 void HelloTriangleApplication::drawFrame()
 {
+	uint32_t imageIndex = 0;
+	vkAcquireNextImageKHR(logicalDevice, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+
+	vkResetCommandBuffer(commandBuffer, 0);
+	recordCommandBuffer(commandBuffer, imageIndex);
+
+	VkSemaphore          waitSemaphores[]   = {imageAvailableSemaphore};
+	VkSemaphore          signalSemaphores[] = {renderFinishedSemaphore};
+	VkPipelineStageFlags waitStages[]       = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+
+	VkSubmitInfo submitInfo{};
+	submitInfo.sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores    = waitSemaphores;
+	submitInfo.signalSemaphoreCount = 1;
+	submitInfo.pSignalSemaphores    = signalSemaphores;
+	submitInfo.commandBufferCount   = 1;
+	submitInfo.pCommandBuffers      = &commandBuffer;
+	submitInfo.pWaitDstStageMask    = waitStages;
+
+	VkResult result = vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFence);
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
+
+	VkPresentInfoKHR presentInfo{};
+	presentInfo.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores    = signalSemaphores;
+
+	VkSwapchainKHR swapChains[] = {swapChain};
+	presentInfo.swapchainCount  = 1;
+	presentInfo.pSwapchains     = swapChains;
+	presentInfo.pImageIndices   = &imageIndex;
+	presentInfo.pResults        = nullptr;
+
+	vkQueuePresentKHR(presentQueue, &presentInfo);
+
+	vkWaitForFences(logicalDevice, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
+	vkResetFences(logicalDevice, 1, &inFlightFence);
 }
 
 void HelloTriangleApplication::initVulkan()
@@ -313,12 +354,22 @@ void HelloTriangleApplication::createRenderPass()
 	subpass.colorAttachmentCount = 1;
 	subpass.pColorAttachments    = &colorAttachmentRef;
 
+	VkSubpassDependency dependancy{};
+	dependancy.srcSubpass    = VK_SUBPASS_EXTERNAL;
+	dependancy.dstSubpass    = 0;
+	dependancy.srcStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependancy.srcAccessMask = 0;
+	dependancy.dstStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependancy.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
 	VkRenderPassCreateInfo renderPassCreateInfo{};
 	renderPassCreateInfo.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 	renderPassCreateInfo.attachmentCount = 1;
 	renderPassCreateInfo.pAttachments    = &colorAttachment;
 	renderPassCreateInfo.subpassCount    = 1;
 	renderPassCreateInfo.pSubpasses      = &subpass;
+	renderPassCreateInfo.dependencyCount = 1;
+	renderPassCreateInfo.pDependencies   = &dependancy;
 
 	VkResult result = vkCreateRenderPass(logicalDevice, &renderPassCreateInfo, nullptr, &renderPass);
 	if (result != VK_SUCCESS)
@@ -639,7 +690,7 @@ void HelloTriangleApplication::recordCommandBuffer(VkCommandBuffer buffer, uint3
 	}
 
 	VkRenderPassBeginInfo renderPassBeginInfo{};
-	renderPassBeginInfo.sType             = VK_STRUCTURE_TYPE_DEVICE_GROUP_RENDER_PASS_BEGIN_INFO;
+	renderPassBeginInfo.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	renderPassBeginInfo.renderPass        = renderPass;
 	renderPassBeginInfo.framebuffer       = swapChainFramebuffers[imageIndex];
 	renderPassBeginInfo.renderArea.extent = swapChainExtent;
