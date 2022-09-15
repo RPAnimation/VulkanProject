@@ -115,10 +115,10 @@ void HelloTriangleApplication::createInstance()
 		std::cout << "\t" << extension.extensionName << "\n";
 	}
 
-	if (enableValidationLayers && checkValidationLayerSupport())
+	if (enableValidationLayers)
 	{
 		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
-		if (enableValidationLayers)
+		if (enableValidationLayers && checkValidationLayerSupport())
 		{
 			populateDebugMessengerCreateInfo(debugCreateInfo, debugCallback);
 			createInfo.enabledLayerCount   = static_cast<uint32_t>(validationLayers.size());
@@ -135,10 +135,6 @@ void HelloTriangleApplication::createInstance()
 
 			std::cout << "Validation layers disabled.\n ";
 		}
-	}
-	else
-	{
-		throw std::runtime_error("Validation layers not available!");
 	}
 
 	VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);

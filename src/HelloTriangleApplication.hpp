@@ -46,12 +46,12 @@ private:
 
     // Main phase
     void initWindow();
-    void drawFrame();
+    void initVulkan();
     void mainLoop();
+    void drawFrame();
     void cleanup();
 
     // Vulkan phase
-    void initVulkan();
     void createInstance();
     void setupDebugMessanger();
     void createSurface();
