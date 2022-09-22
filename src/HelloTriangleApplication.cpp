@@ -25,14 +25,16 @@ void HelloTriangleApplication::initWindow()
 
 void HelloTriangleApplication::drawFrame()
 {
+	vkWaitForFences(logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+	vkResetFences(logicalDevice, 1, &inFlightFences[currentFrame]);
 	uint32_t imageIndex = 0;
-	vkAcquireNextImageKHR(logicalDevice, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+	vkAcquireNextImageKHR(logicalDevice, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
-	vkResetCommandBuffer(commandBuffer, 0);
-	recordCommandBuffer(commandBuffer, imageIndex);
+	vkResetCommandBuffer(commandBuffers[currentFrame], 0);
+	recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
 
-	VkSemaphore          waitSemaphores[]   = {imageAvailableSemaphore};
-	VkSemaphore          signalSemaphores[] = {renderFinishedSemaphore};
+	VkSemaphore          waitSemaphores[]   = {imageAvailableSemaphores[currentFrame]};
+	VkSemaphore          signalSemaphores[] = {renderFinishedSemaphores[currentFrame]};
 	VkPipelineStageFlags waitStages[]       = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 
 	VkSubmitInfo submitInfo{};
@@ -42,10 +44,10 @@ void HelloTriangleApplication::drawFrame()
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores    = signalSemaphores;
 	submitInfo.commandBufferCount   = 1;
-	submitInfo.pCommandBuffers      = &commandBuffer;
+	submitInfo.pCommandBuffers      = &commandBuffers[currentFrame];
 	submitInfo.pWaitDstStageMask    = waitStages;
 
-	VkResult result = vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFence);
+	VkResult result = vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]);
 	if (result != VK_SUCCESS)
 	{
 		throw std::runtime_error(err2msg(result));
@@ -64,8 +66,9 @@ void HelloTriangleApplication::drawFrame()
 
 	vkQueuePresentKHR(presentQueue, &presentInfo);
 
-	vkWaitForFences(logicalDevice, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
-	vkResetFences(logicalDevice, 1, &inFlightFence);
+	//	vkWaitForFences(logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+	//	vkResetFences(logicalDevice, 1, &inFlightFences[currentFrame]);
+	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 void HelloTriangleApplication::initVulkan()
@@ -81,7 +84,7 @@ void HelloTriangleApplication::initVulkan()
 	createGraphicsPipeline();
 	createFramebuffers();
 	createCommandPool();
-	createCommandBuffer();
+	createCommandBuffers();
 	createSyncObjects();
 }
 
@@ -559,15 +562,16 @@ void HelloTriangleApplication::createCommandPool()
 	}
 }
 
-void HelloTriangleApplication::createCommandBuffer()
+void HelloTriangleApplication::createCommandBuffers()
 {
+	commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 	VkCommandBufferAllocateInfo allocInfo{};
 	allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	allocInfo.commandPool        = commandPool;
 	allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandBufferCount = 1;
+	allocInfo.commandBufferCount = (uint32_t) commandBuffers.size();
 
-	VkResult result = vkAllocateCommandBuffers(logicalDevice, &allocInfo, &commandBuffer);
+	VkResult result = vkAllocateCommandBuffers(logicalDevice, &allocInfo, commandBuffers.data());
 	if (result != VK_SUCCESS)
 	{
 		throw std::runtime_error(err2msg(result));
@@ -576,25 +580,34 @@ void HelloTriangleApplication::createCommandBuffer()
 
 void HelloTriangleApplication::createSyncObjects()
 {
+	imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+	renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+	inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+
 	VkSemaphoreCreateInfo semaphoreCreateInfo{};
 	semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
 	VkFenceCreateInfo fenceCreateInfo{};
 	fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-	VkResult result = vkCreateSemaphore(logicalDevice, &semaphoreCreateInfo, nullptr, &imageAvailableSemaphore);
-	if (result != VK_SUCCESS)
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
 	{
-		throw std::runtime_error(err2msg(result));
-	}
-	result = vkCreateSemaphore(logicalDevice, &semaphoreCreateInfo, nullptr, &renderFinishedSemaphore);
-	if (result != VK_SUCCESS)
-	{
-		throw std::runtime_error(err2msg(result));
-	}
-	result = vkCreateFence(logicalDevice, &fenceCreateInfo, nullptr, &inFlightFence);
-	if (result != VK_SUCCESS)
-	{
-		throw std::runtime_error(err2msg(result));
+		VkResult result = vkCreateSemaphore(logicalDevice, &semaphoreCreateInfo, nullptr, &imageAvailableSemaphores[i]);
+		if (result != VK_SUCCESS)
+		{
+			throw std::runtime_error(err2msg(result));
+		}
+		result = vkCreateSemaphore(logicalDevice, &semaphoreCreateInfo, nullptr, &renderFinishedSemaphores[i]);
+		if (result != VK_SUCCESS)
+		{
+			throw std::runtime_error(err2msg(result));
+		}
+		result = vkCreateFence(logicalDevice, &fenceCreateInfo, nullptr, &inFlightFences[i]);
+		if (result != VK_SUCCESS)
+		{
+			throw std::runtime_error(err2msg(result));
+		}
 	}
 }
 
@@ -610,9 +623,12 @@ void HelloTriangleApplication::mainLoop()
 }
 void HelloTriangleApplication::cleanup()
 {
-	vkDestroySemaphore(logicalDevice, imageAvailableSemaphore, nullptr);
-	vkDestroySemaphore(logicalDevice, renderFinishedSemaphore, nullptr);
-	vkDestroyFence(logicalDevice, inFlightFence, nullptr);
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+	{
+		vkDestroySemaphore(logicalDevice, imageAvailableSemaphores[i], nullptr);
+		vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
+		vkDestroyFence(logicalDevice, inFlightFences[i], nullptr);
+	}
 
 	vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
 	for (auto buffer : swapChainFramebuffers)
@@ -698,13 +714,13 @@ void HelloTriangleApplication::recordCommandBuffer(VkCommandBuffer buffer, uint3
 	renderPassBeginInfo.clearValueCount = 1;
 	renderPassBeginInfo.pClearValues    = &clearColor;
 
-	vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
-	vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+	vkCmdBeginRenderPass(commandBuffers[currentFrame], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+	vkCmdDraw(commandBuffers[currentFrame], 3, 1, 0, 0);
 
-	vkCmdEndRenderPass(commandBuffer);
+	vkCmdEndRenderPass(commandBuffers[currentFrame]);
 
-	result = vkEndCommandBuffer(commandBuffer);
+	result = vkEndCommandBuffer(commandBuffers[currentFrame]);
 	if (result != VK_SUCCESS)
 	{
 		throw std::runtime_error(err2msg(result));

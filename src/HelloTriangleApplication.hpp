@@ -18,6 +18,7 @@ public:
     const uint32_t WIDTH = 800;
     const uint32_t HEIGHT = 600;
     const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
+    const int MAX_FRAMES_IN_FLIGHT = 2;
     void run();
 private:
     GLFWwindow* window;
@@ -39,10 +40,10 @@ private:
     VkPipeline graphicsPipeline;
     std::vector<VkFramebuffer> swapChainFramebuffers;
     VkCommandPool commandPool;
-    VkCommandBuffer commandBuffer;
-    VkFence inFlightFence;
-    VkSemaphore imageAvailableSemaphore;
-    VkSemaphore renderFinishedSemaphore;
+    std::vector<VkCommandBuffer> commandBuffers;
+    std::vector<VkFence> inFlightFences;
+    std::vector<VkSemaphore> imageAvailableSemaphores;
+    std::vector<VkSemaphore> renderFinishedSemaphores;
 
     // Main phase
     void initWindow();
@@ -63,8 +64,11 @@ private:
     void createGraphicsPipeline();
     void createFramebuffers();
     void createCommandPool();
-    void createCommandBuffer();
+    void createCommandBuffers();
     void createSyncObjects();
+
+    // Helpful variables
+    uint32_t currentFrame = 0;
 
     // Support functions
     bool checkValidationLayerSupport();
