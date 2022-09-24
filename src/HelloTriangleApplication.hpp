@@ -20,6 +20,8 @@ public:
     const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
     const int MAX_FRAMES_IN_FLIGHT = 2;
     void run();
+    bool framebufferResized = false;
+
 private:
     GLFWwindow* window;
     VkInstance instance;
@@ -58,6 +60,8 @@ private:
     void createSurface();
     void pickPhysicalDevice();
     void createLogicalDevice();
+    void recreateSwapChain();
+    void cleanupSwapChain();
     void createSwapChain();
     void createImageViews();
     void createRenderPass();
@@ -79,5 +83,7 @@ private:
                   void* pUserData);
     void recordCommandBuffer(VkCommandBuffer buffer, uint32_t imageIndex);
 };
+
+static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 
 #endif
