@@ -1,7 +1,11 @@
 #include "HelloTriangleApplication.hpp"
 #include "VulkanUtils.hpp"
-
 #include <set>
+
+const std::vector<Vertex> vertices = {
+    {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
 
 void HelloTriangleApplication::run()
 {
@@ -462,12 +466,15 @@ void HelloTriangleApplication::createGraphicsPipeline()
 
 	VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageCreateInfo, fragShaderStageCreateInfo};
 
+	auto bindingDescription   = Vertex::getBindingDescription();
+	auto attributeDescription = Vertex::getAttributeDescription();
+
 	VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo{};
 	vertexInputStateCreateInfo.sType                           = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexInputStateCreateInfo.vertexBindingDescriptionCount   = 0;
-	vertexInputStateCreateInfo.pVertexBindingDescriptions      = nullptr;
-	vertexInputStateCreateInfo.vertexAttributeDescriptionCount = 0;
-	vertexInputStateCreateInfo.pVertexAttributeDescriptions    = nullptr;
+	vertexInputStateCreateInfo.vertexBindingDescriptionCount   = 1;
+	vertexInputStateCreateInfo.pVertexBindingDescriptions      = &bindingDescription;
+	vertexInputStateCreateInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescription.size());
+	vertexInputStateCreateInfo.pVertexAttributeDescriptions    = attributeDescription.data();
 
 	VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo{};
 	inputAssemblyStateCreateInfo.sType                  = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;

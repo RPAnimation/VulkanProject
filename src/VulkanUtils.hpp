@@ -3,6 +3,8 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include <array>
+#include <glm/glm.hpp>
 #include <optional>
 #include <vulkan/vulkan.hpp>
 
@@ -24,6 +26,35 @@ struct QueueFamiliyIndices
     std::optional<uint32_t> presentFamily;
 
     bool isComplete() { return graphicsFamily.has_value() && presentFamily.has_value(); }
+};
+
+struct Vertex
+{
+    glm::vec2 pos;
+    glm::vec3 color;
+
+    static VkVertexInputBindingDescription getBindingDescription()
+    {
+        VkVertexInputBindingDescription description{};
+        description.binding = 0;
+        description.stride = sizeof(Vertex);
+        description.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+        return description;
+    }
+    static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescription()
+    {
+        std::array<VkVertexInputAttributeDescription, 2> description{};
+        description[0].binding = 0;
+        description[0].location = 0;
+        description[0].format = VK_FORMAT_R32G32_SFLOAT;
+        description[0].offset = offsetof(Vertex, pos);
+
+        description[1].binding = 0;
+        description[1].location = 1;
+        description[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+        description[1].offset = offsetof(Vertex, color);
+        return description;
+    }
 };
 
 // SWAP CHAIN SUPPORT CHECK
