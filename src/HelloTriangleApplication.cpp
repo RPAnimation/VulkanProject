@@ -634,38 +634,12 @@ void HelloTriangleApplication::createCommandPool()
 
 void HelloTriangleApplication::createVertexBuffer()
 {
-	VkBufferCreateInfo vertexBufferCreateInfo{};
-	vertexBufferCreateInfo.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	vertexBufferCreateInfo.size        = sizeof(vertices[0]) * vertices.size();
-	vertexBufferCreateInfo.usage       = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-	vertexBufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	vertexBufferCreateInfo.flags       = 0;
-
-	VkResult result = vkCreateBuffer(logicalDevice, &vertexBufferCreateInfo, nullptr, &vertexBuffer);
-	if (result != VK_SUCCESS)
-	{
-		throw std::runtime_error(err2msg(result));
-	}
-
-	VkMemoryRequirements memRequirements{};
-	vkGetBufferMemoryRequirements(logicalDevice, vertexBuffer, &memRequirements);
-
-	VkMemoryAllocateInfo memoryAllocInfo{};
-	memoryAllocInfo.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	memoryAllocInfo.allocationSize  = memRequirements.size;
-	memoryAllocInfo.memoryTypeIndex = findMemoryType(physicalDevice, memRequirements.memoryTypeBits, static_cast<VkMemoryPropertyFlags>(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
-
-	result = vkAllocateMemory(logicalDevice, &memoryAllocInfo, nullptr, &vertexBufferMemory);
-	if (result != VK_SUCCESS)
-	{
-		throw std::runtime_error(err2msg(result));
-	}
-
-	vkBindBufferMemory(logicalDevice, vertexBuffer, vertexBufferMemory, 0);
+	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+	createMemoryBuffer(logicalDevice, physicalDevice, bufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, static_cast<VkMemoryPropertyFlags>(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT), vertexBuffer, vertexBufferMemory);
 
 	void *data;
-	vkMapMemory(logicalDevice, vertexBufferMemory, 0, vertexBufferCreateInfo.size, 0, &data);
-	memcpy(data, vertices.data(), (size_t) vertexBufferCreateInfo.size);
+	vkMapMemory(logicalDevice, vertexBufferMemory, 0, bufferSize, 0, &data);
+	memcpy(data, vertices.data(), bufferSize);
 }
 
 void HelloTriangleApplication::createCommandBuffers()

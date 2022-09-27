@@ -274,3 +274,35 @@ uint32_t findMemoryType(const VkPhysicalDevice physicalDevice, uint32_t typeFilt
 	}
 	throw std::runtime_error("Failed to find suitable memory type!");
 }
+
+void createMemoryBuffer(const VkDevice &device, const VkPhysicalDevice &physicalDevice, VkDeviceSize deviceSize, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &deviceMemory)
+{
+	VkBufferCreateInfo bufferCreateInfo{};
+	bufferCreateInfo.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	bufferCreateInfo.size        = deviceSize;
+	bufferCreateInfo.usage       = usageFlags;
+	bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	bufferCreateInfo.flags       = 0;
+
+	VkResult result = vkCreateBuffer(device, &bufferCreateInfo, nullptr, &buffer);
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
+
+	VkMemoryRequirements memRequirements{};
+	vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
+
+	VkMemoryAllocateInfo memoryAllocInfo{};
+	memoryAllocInfo.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	memoryAllocInfo.allocationSize  = memRequirements.size;
+	memoryAllocInfo.memoryTypeIndex = findMemoryType(physicalDevice, memRequirements.memoryTypeBits, properties);
+
+	result = vkAllocateMemory(device, &memoryAllocInfo, nullptr, &deviceMemory);
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
+
+	vkBindBufferMemory(device, buffer, deviceMemory, 0);
+}

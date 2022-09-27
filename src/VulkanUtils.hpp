@@ -102,4 +102,12 @@ uint32_t findMemoryType(const VkPhysicalDevice physicalDevice,
                         uint32_t typeFilter,
                         VkMemoryPropertyFlags properties);
 
+void createMemoryBuffer(const VkDevice& device,
+                        const VkPhysicalDevice& physicalDevice,
+                        VkDeviceSize deviceSize,
+                        VkBufferUsageFlags usageFlags,
+                        VkMemoryPropertyFlags properties,
+                        VkBuffer& buffer,
+                        VkDeviceMemory& deviceMemory);
+
 #endif
