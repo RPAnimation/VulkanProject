@@ -260,3 +260,17 @@ VkShaderModule createShaderModule(const VkDevice &device, const std::vector<char
 	}
 	return shaderModule;
 }
+
+uint32_t findMemoryType(const VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties)
+{
+	VkPhysicalDeviceMemoryProperties deviceMemoryProperties;
+	vkGetPhysicalDeviceMemoryProperties(physicalDevice, &deviceMemoryProperties);
+	for (uint32_t i = 0; i < deviceMemoryProperties.memoryTypeCount; ++i)
+	{
+		if ((typeFilter & (1 << i)) && (deviceMemoryProperties.memoryTypes[i].propertyFlags & properties) == properties)
+		{
+			return i;
+		}
+	}
+	throw std::runtime_error("Failed to find suitable memory type!");
+}

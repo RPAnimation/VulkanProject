@@ -114,6 +114,7 @@ void HelloTriangleApplication::initVulkan()
 	createGraphicsPipeline();
 	createFramebuffers();
 	createCommandPool();
+	createVertexBuffer();
 	createCommandBuffers();
 	createSyncObjects();
 }
@@ -631,6 +632,42 @@ void HelloTriangleApplication::createCommandPool()
 	}
 }
 
+void HelloTriangleApplication::createVertexBuffer()
+{
+	VkBufferCreateInfo vertexBufferCreateInfo{};
+	vertexBufferCreateInfo.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	vertexBufferCreateInfo.size        = sizeof(vertices[0]) * vertices.size();
+	vertexBufferCreateInfo.usage       = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+	vertexBufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	vertexBufferCreateInfo.flags       = 0;
+
+	VkResult result = vkCreateBuffer(logicalDevice, &vertexBufferCreateInfo, nullptr, &vertexBuffer);
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
+
+	VkMemoryRequirements memRequirements{};
+	vkGetBufferMemoryRequirements(logicalDevice, vertexBuffer, &memRequirements);
+
+	VkMemoryAllocateInfo memoryAllocInfo{};
+	memoryAllocInfo.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	memoryAllocInfo.allocationSize  = memRequirements.size;
+	memoryAllocInfo.memoryTypeIndex = findMemoryType(physicalDevice, memRequirements.memoryTypeBits, static_cast<VkMemoryPropertyFlags>(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
+
+	result = vkAllocateMemory(logicalDevice, &memoryAllocInfo, nullptr, &vertexBufferMemory);
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
+
+	vkBindBufferMemory(logicalDevice, vertexBuffer, vertexBufferMemory, 0);
+
+	void *data;
+	vkMapMemory(logicalDevice, vertexBufferMemory, 0, vertexBufferCreateInfo.size, 0, &data);
+	memcpy(data, vertices.data(), (size_t) vertexBufferCreateInfo.size);
+}
+
 void HelloTriangleApplication::createCommandBuffers()
 {
 	commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
@@ -693,6 +730,9 @@ void HelloTriangleApplication::mainLoop()
 void HelloTriangleApplication::cleanup()
 {
 	cleanupSwapChain();
+
+	vkDestroyBuffer(logicalDevice, vertexBuffer, nullptr);
+	vkFreeMemory(logicalDevice, vertexBufferMemory, nullptr);
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
 	{
@@ -777,7 +817,11 @@ void HelloTriangleApplication::recordCommandBuffer(VkCommandBuffer buffer, uint3
 
 	vkCmdBeginRenderPass(commandBuffers[currentFrame], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
-	vkCmdDraw(commandBuffers[currentFrame], 3, 1, 0, 0);
+
+	VkBuffer     vertexBuffers[] = {vertexBuffer};
+	VkDeviceSize offsets[]       = {0};
+	vkCmdBindVertexBuffers(buffer, 0, 1, vertexBuffers, offsets);
+	vkCmdDraw(commandBuffers[currentFrame], static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 
 	vkCmdEndRenderPass(commandBuffers[currentFrame]);
 

@@ -98,4 +98,8 @@ std::vector<char> readFile(const std::string &filename);
 
 VkShaderModule createShaderModule(const VkDevice& device, const std::vector<char>& code);
 
+uint32_t findMemoryType(const VkPhysicalDevice physicalDevice,
+                        uint32_t typeFilter,
+                        VkMemoryPropertyFlags properties);
+
 #endif
