@@ -110,4 +110,11 @@ void createMemoryBuffer(const VkDevice& device,
                         VkBuffer& buffer,
                         VkDeviceMemory& deviceMemory);
 
+void copyBuffer(VkBuffer srcBuffer,
+                VkBuffer dstBuffer,
+                VkDeviceSize size,
+                const VkCommandPool& commandPool,
+                const VkDevice& device,
+                const VkQueue& graphicsQueue);
+
 #endif
