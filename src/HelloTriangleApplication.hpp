@@ -44,6 +44,8 @@ private:
     VkCommandPool commandPool;
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
+    VkBuffer indexBuffer;
+    VkDeviceMemory indexBufferMemory;
     std::vector<VkCommandBuffer> commandBuffers;
     std::vector<VkFence> inFlightFences;
     std::vector<VkSemaphore> imageAvailableSemaphores;
@@ -71,6 +73,7 @@ private:
     void createFramebuffers();
     void createCommandPool();
     void createVertexBuffer();
+    void createIndexBuffer();
     void createCommandBuffers();
     void createSyncObjects();
 
