@@ -832,8 +832,9 @@ void HelloTriangleApplication::recordCommandBuffer(VkCommandBuffer buffer, uint3
 
 	VkBuffer     vertexBuffers[] = {vertexBuffer};
 	VkDeviceSize offsets[]       = {0};
-	vkCmdBindVertexBuffers(buffer, 0, 1, vertexBuffers, offsets);
-	vkCmdDraw(commandBuffers[currentFrame], static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+	vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
+	vkCmdBindIndexBuffer(commandBuffers[currentFrame], indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+	vkCmdDrawIndexed(commandBuffers[currentFrame], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
 	vkCmdEndRenderPass(commandBuffers[currentFrame]);
 
