@@ -1,7 +1,7 @@
 # Vulkan project
-Simple vulkan app that presents a triangle.
+Simple vulkan app that renders a rectangle.
 
-![Main window](screenshots/main_window_1.png)
+![Main window](screenshots/main_window_2.png)
 
 ## Resources
 - [Vulkan Tutorial](https://vulkan-tutorial.com/)
