@@ -47,6 +47,8 @@ private:
     VkDeviceMemory vertexBufferMemory;
     VkBuffer indexBuffer;
     VkDeviceMemory indexBufferMemory;
+    std::vector<VkBuffer> uniformBuffers;
+    std::vector<VkDeviceMemory> uniformBuffersMemory;
     std::vector<VkCommandBuffer> commandBuffers;
     std::vector<VkFence> inFlightFences;
     std::vector<VkSemaphore> imageAvailableSemaphores;
@@ -76,6 +78,7 @@ private:
     void createCommandPool();
     void createVertexBuffer();
     void createIndexBuffer();
+    void createUniformBuffers();
     void createCommandBuffers();
     void createSyncObjects();
 
@@ -90,6 +93,7 @@ private:
                   const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
                   void* pUserData);
     void recordCommandBuffer(VkCommandBuffer buffer, uint32_t imageIndex);
+    void updateUniformBuffer(uint32_t currentImage);
 };
 
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
