@@ -22,6 +22,7 @@ set(EXEC_SOURCES
 
 add_executable(${PROJECT_NAME} ${EXEC_SOURCES})
 target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan glfw)
+include_directories("./lib")
 
 # SHADERS
 set(GLSL_VALIDATOR "/usr/bin/glslangValidator")
