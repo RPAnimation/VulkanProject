@@ -51,7 +51,12 @@ add_custom_target(
 
 add_dependencies(vulkan_project Shaders)
 
-add_custom_command(TARGET vulkan_project POST_BUILD
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:vulkan_project>/shaders/"
     COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_BINARY_DIR}/shaders" "$<TARGET_FILE_DIR:vulkan_project>/shaders"
+)
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:vulkan_project>/textures/"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/textures" "$<TARGET_FILE_DIR:vulkan_project>/textures"
 )

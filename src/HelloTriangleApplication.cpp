@@ -5,6 +5,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <set>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 const std::vector<Vertex> vertices = {
     {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
@@ -124,6 +126,7 @@ void HelloTriangleApplication::initVulkan()
 	createGraphicsPipeline();
 	createFramebuffers();
 	createCommandPool();
+	createTextureImage();
 	createVertexBuffer();
 	createIndexBuffer();
 	createUniformBuffers();
@@ -677,6 +680,53 @@ void HelloTriangleApplication::createCommandPool()
 	}
 }
 
+void HelloTriangleApplication::createTextureImage()
+{
+	int      texWidth, texHeight, texChannels;
+	stbi_uc *pixels = stbi_load("textures/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+	if (pixels == NULL)
+	{
+		throw std::runtime_error("Couldn't load texture");
+	}
+
+	VkDeviceSize   imageSize = texHeight * texHeight * 4;
+	VkBuffer       stagingBuffer;
+	VkDeviceMemory stagingBufferMemory;
+	createMemoryBuffer(logicalDevice, physicalDevice, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+	void *data;
+	vkMapMemory(logicalDevice, stagingBufferMemory, 0, imageSize, 0, &data);
+	memcpy(data, pixels, static_cast<size_t>(imageSize));
+	vkUnmapMemory(logicalDevice, stagingBufferMemory);
+
+	stbi_image_free(pixels);
+
+	VkImageCreateInfo imageCreateInfo{};
+	imageCreateInfo.sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+	imageCreateInfo.imageType     = VK_IMAGE_TYPE_2D;
+	imageCreateInfo.extent.width  = static_cast<int32_t>(texWidth);
+	imageCreateInfo.extent.height = static_cast<int32_t>(texHeight);
+	imageCreateInfo.extent.depth  = 1;
+	imageCreateInfo.mipLevels     = 1;
+	imageCreateInfo.arrayLayers   = 1;
+	imageCreateInfo.format        = VK_FORMAT_R8G8B8A8_SRGB;
+	imageCreateInfo.tiling        = VK_IMAGE_TILING_OPTIMAL;
+	imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	imageCreateInfo.usage         = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+	imageCreateInfo.sharingMode   = VK_SHARING_MODE_EXCLUSIVE;
+	imageCreateInfo.samples       = VK_SAMPLE_COUNT_1_BIT;
+	imageCreateInfo.flags         = 0;
+	imageCreateInfo.
+
+	    VkResult result = vkCreateImage(logicalDevice, &imageCreateInfo, nullptr, &textureImage);
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
+	vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
+	vkFreeMemory(logicalDevice, stagingBufferMemory, nullptr);
+}
+
 void HelloTriangleApplication::createVertexBuffer()
 {
 	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
@@ -854,6 +904,9 @@ void HelloTriangleApplication::cleanup()
 
 	vkDestroyBuffer(logicalDevice, vertexBuffer, nullptr);
 	vkFreeMemory(logicalDevice, vertexBufferMemory, nullptr);
+
+	vkDestroyImage(logicalDevice, textureImage, nullptr);
+	vkFreeMemory(logicalDevice, textureImageMemory, nullptr);
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
 	{
