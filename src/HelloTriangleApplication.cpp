@@ -716,9 +716,8 @@ void HelloTriangleApplication::createTextureImage()
 	imageCreateInfo.sharingMode   = VK_SHARING_MODE_EXCLUSIVE;
 	imageCreateInfo.samples       = VK_SAMPLE_COUNT_1_BIT;
 	imageCreateInfo.flags         = 0;
-	imageCreateInfo.
 
-	    VkResult result = vkCreateImage(logicalDevice, &imageCreateInfo, nullptr, &textureImage);
+	VkResult result = vkCreateImage(logicalDevice, &imageCreateInfo, nullptr, &textureImage);
 	if (result != VK_SUCCESS)
 	{
 		throw std::runtime_error(err2msg(result));
