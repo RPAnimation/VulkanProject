@@ -337,3 +337,46 @@ void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size, const
 
 	vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
 }
+
+void createImage(int32_t textureWidth, int32_t textureHeight, const VkPhysicalDevice &physicalDevice,
+                 const VkDevice &logicalDevice, VkImage &textureImage, VkDeviceMemory &textureImageMemory,
+                 VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties)
+{
+	VkImageCreateInfo imageCreateInfo{};
+	imageCreateInfo.sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+	imageCreateInfo.imageType     = VK_IMAGE_TYPE_2D;
+	imageCreateInfo.extent.width  = textureWidth;
+	imageCreateInfo.extent.height = textureHeight;
+	imageCreateInfo.extent.depth  = 1;
+	imageCreateInfo.mipLevels     = 1;
+	imageCreateInfo.arrayLayers   = 1;
+	imageCreateInfo.format        = format;
+	imageCreateInfo.tiling        = tiling;
+	imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	imageCreateInfo.usage         = usage;
+	imageCreateInfo.sharingMode   = VK_SHARING_MODE_EXCLUSIVE;
+	imageCreateInfo.samples       = VK_SAMPLE_COUNT_1_BIT;
+	imageCreateInfo.flags         = 0;
+
+	VkResult result = vkCreateImage(logicalDevice, &imageCreateInfo, nullptr, &textureImage);
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
+
+	VkMemoryRequirements memoryRequirements;
+	vkGetImageMemoryRequirements(logicalDevice, textureImage, &memoryRequirements);
+
+	VkMemoryAllocateInfo allocateInfo{};
+	allocateInfo.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	allocateInfo.memoryTypeIndex = findMemoryType(physicalDevice, memoryRequirements.memoryTypeBits, properties);
+	allocateInfo.allocationSize  = memoryRequirements.size;
+
+	result = vkAllocateMemory(logicalDevice, &allocateInfo, nullptr, &textureImageMemory);
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error(err2msg(result));
+	}
+
+	vkBindImageMemory(logicalDevice, textureImage, textureImageMemory, 0);
+}

@@ -124,4 +124,8 @@ void copyBuffer(VkBuffer srcBuffer,
                 const VkDevice& device,
                 const VkQueue& graphicsQueue);
 
+void createImage(int32_t textureWidth, int32_t textureHeight, const VkPhysicalDevice &physicalDevice,
+                 const VkDevice &logicalDevice, VkImage &textureImage, VkDeviceMemory &textureImageMemory,
+                 VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties);
+
 #endif
