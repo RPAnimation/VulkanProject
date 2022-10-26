@@ -109,23 +109,26 @@ uint32_t findMemoryType(const VkPhysicalDevice physicalDevice,
                         uint32_t typeFilter,
                         VkMemoryPropertyFlags properties);
 
-void createMemoryBuffer(const VkDevice& device,
-                        const VkPhysicalDevice& physicalDevice,
-                        VkDeviceSize deviceSize,
-                        VkBufferUsageFlags usageFlags,
-                        VkMemoryPropertyFlags properties,
-                        VkBuffer& buffer,
-                        VkDeviceMemory& deviceMemory);
+void createMemoryBuffer(const VkDevice         &device,
+                        const VkPhysicalDevice &physicalDevice,
+                        VkDeviceSize            deviceSize,
+                        VkBufferUsageFlags      usageFlags,
+                        VkMemoryPropertyFlags   properties,
+                        VkBuffer               &buffer,
+                        VkDeviceMemory         &deviceMemory);
 
-void copyBuffer(VkBuffer srcBuffer,
-                VkBuffer dstBuffer,
-                VkDeviceSize size,
-                const VkCommandPool& commandPool,
-                const VkDevice& device,
-                const VkQueue& graphicsQueue);
+void copyBuffer(VkBuffer             srcBuffer,
+                VkBuffer             dstBuffer,
+                VkDeviceSize         size,
+                const VkCommandPool &commandPool,
+                const VkDevice      &device,
+                const VkQueue       &graphicsQueue);
 
 void createImage(int32_t textureWidth, int32_t textureHeight, const VkPhysicalDevice &physicalDevice,
                  const VkDevice &logicalDevice, VkImage &textureImage, VkDeviceMemory &textureImageMemory,
                  VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties);
+
+VkCommandBuffer beginSingleTimeCommands(const VkCommandPool &commandPool, const VkDevice &device);
+void            endSingleTimeCommands(const VkDevice &device, const VkCommandPool &commandPool, const VkCommandBuffer &commandBuffer, const VkQueue &graphicsQueue);
 
 #endif
