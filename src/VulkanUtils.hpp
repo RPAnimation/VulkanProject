@@ -22,10 +22,13 @@ struct error_codes
 
 struct QueueFamiliyIndices
 {
-    std::optional<uint32_t> graphicsFamily;
-    std::optional<uint32_t> presentFamily;
+	std::optional<uint32_t> graphicsFamily;
+	std::optional<uint32_t> presentFamily;
 
-    bool isComplete() { return graphicsFamily.has_value() && presentFamily.has_value(); }
+	bool isComplete()
+	{
+		return graphicsFamily.has_value() && presentFamily.has_value();
+	}
 };
 
 struct Vertex
@@ -84,26 +87,26 @@ VkResult CreateDebugUtilsMessengerEXT(VkInstance instance,
 void DestroyDebugUtilsMessengerEXT(VkInstance instance,
                                    VkDebugUtilsMessengerEXT debugMessenger,
                                    const VkAllocationCallbacks* pAllocator);
-void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo,
-                                      PFN_vkDebugUtilsMessengerCallbackEXT debugCallback);
+void                     populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT  &createInfo,
+                                                          PFN_vkDebugUtilsMessengerCallbackEXT debugCallback);
 
 bool isDeviceSuitable(const VkPhysicalDevice device, const VkSurfaceKHR surface);
 
-QueueFamiliyIndices findQueueFamilies(const VkPhysicalDevice& device, const VkSurfaceKHR& surface);
+QueueFamiliyIndices findQueueFamilies(const VkPhysicalDevice &device, const VkSurfaceKHR &surface);
 
 bool checkDeviceExtensionSupport(const VkPhysicalDevice device);
 
-SwapChainSupportDetails querySwapChainSupport(const VkPhysicalDevice& device,
-                                              const VkSurfaceKHR surface);
-VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+SwapChainSupportDetails querySwapChainSupport(const VkPhysicalDevice &device,
+                                              const VkSurfaceKHR      surface);
+VkSurfaceFormatKHR      chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats);
 
-VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
+VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes);
 
-VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilities, GLFWwindow* window);
+VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &surfaceCapabilities, GLFWwindow *window);
 
 std::vector<char> readFile(const std::string &filename);
 
-VkShaderModule createShaderModule(const VkDevice& device, const std::vector<char>& code);
+VkShaderModule createShaderModule(const VkDevice &device, const std::vector<char> &code);
 
 uint32_t findMemoryType(const VkPhysicalDevice physicalDevice,
                         uint32_t typeFilter,
@@ -131,4 +134,7 @@ void createImage(int32_t textureWidth, int32_t textureHeight, const VkPhysicalDe
 VkCommandBuffer beginSingleTimeCommands(const VkCommandPool &commandPool, const VkDevice &device);
 void            endSingleTimeCommands(const VkDevice &device, const VkCommandPool &commandPool, const VkCommandBuffer &commandBuffer, const VkQueue &graphicsQueue);
 
+void transitionImageLayout(const VkDevice &device, const VkCommandPool &commandPool, const VkQueue &graphicsQueue, const VkImageLayout &oldLayout, const VkImageLayout &newLayout);
+
+void copyBufferToImage(const VkDevice &device, const VkCommandPool &commandPool, const VkQueue &graphicsQueue, VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 #endif
