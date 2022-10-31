@@ -14,9 +14,9 @@ class HelloTriangleApplication
 {
 public:
     const char* APP_NAME = "First Vulkan App";
-    const char* ENGINE_NAME = "No engine";
-    const uint32_t WIDTH = 800;
-    const uint32_t HEIGHT = 600;
+	const char	                 *ENGINE_NAME          = "No engine";
+	const uint32_t                  WIDTH                = 800;
+	const uint32_t                  HEIGHT               = 600;
 	const std::vector<const char *> validationLayers     = {"VK_LAYER_KHRONOS_validation"};
 	const int                       MAX_FRAMES_IN_FLIGHT = 2;
 	void                            run();
@@ -65,6 +65,7 @@ public:
 	// Textures
 	VkImage        textureImage;
 	VkDeviceMemory textureImageMemory;
+	VkImageView    textureImageView;
 
 	// Main phase
 	void initWindow();
@@ -89,6 +90,7 @@ public:
 	void createFramebuffers();
 	void createCommandPool();
 	void createTextureImage();
+	void createTextureImageView();
 	void createVertexBuffer();
 	void createIndexBuffer();
 	void createUniformBuffers();

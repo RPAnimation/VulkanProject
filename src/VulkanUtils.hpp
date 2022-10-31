@@ -137,4 +137,6 @@ void            endSingleTimeCommands(const VkDevice &device, const VkCommandPoo
 void transitionImageLayout(const VkDevice &device, const VkCommandPool &commandPool, const VkQueue &graphicsQueue, const VkImageLayout &oldLayout, const VkImageLayout &newLayout, VkImage &image);
 
 void copyBufferToImage(const VkDevice &device, const VkCommandPool &commandPool, const VkQueue &graphicsQueue, VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+
+VkImageView createImageView(VkDevice device, VkImage image, VkFormat format);
 #endif

@@ -127,6 +127,7 @@ void HelloTriangleApplication::initVulkan()
 	createFramebuffers();
 	createCommandPool();
 	createTextureImage();
+	createTextureImageView();
 	createVertexBuffer();
 	createIndexBuffer();
 	createUniformBuffers();
@@ -405,25 +406,7 @@ void HelloTriangleApplication::createImageViews()
 	swapChainImageViews.resize(swapChainImages.size());
 	for (size_t i = 0; i < swapChainImages.size(); ++i)
 	{
-		VkImageViewCreateInfo createInfo{};
-		createInfo.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		createInfo.image                           = swapChainImages[i];
-		createInfo.viewType                        = VK_IMAGE_VIEW_TYPE_2D;
-		createInfo.format                          = swapChainImageFormat;
-		createInfo.components.a                    = VK_COMPONENT_SWIZZLE_IDENTITY;
-		createInfo.components.r                    = VK_COMPONENT_SWIZZLE_IDENTITY;
-		createInfo.components.g                    = VK_COMPONENT_SWIZZLE_IDENTITY;
-		createInfo.components.b                    = VK_COMPONENT_SWIZZLE_IDENTITY;
-		createInfo.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
-		createInfo.subresourceRange.baseMipLevel   = 0;
-		createInfo.subresourceRange.levelCount     = 1;
-		createInfo.subresourceRange.baseArrayLayer = 0;
-		createInfo.subresourceRange.layerCount     = 1;
-		VkResult result                            = vkCreateImageView(logicalDevice, &createInfo, nullptr, &swapChainImageViews[i]);
-		if (result != VK_SUCCESS)
-		{
-			throw std::runtime_error(err2msg(result));
-		}
+		swapChainImageViews[i] = createImageView(logicalDevice, swapChainImages[i], swapChainImageFormat);
 	}
 }
 
@@ -717,6 +700,11 @@ void HelloTriangleApplication::createTextureImage()
 	vkFreeMemory(logicalDevice, stagingBufferMemory, nullptr);
 }
 
+void HelloTriangleApplication::createTextureImageView()
+{
+	textureImageView = createImageView(logicalDevice, textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+}
+
 void HelloTriangleApplication::createVertexBuffer()
 {
 	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
@@ -900,6 +888,7 @@ void HelloTriangleApplication::mainLoop()
 void HelloTriangleApplication::cleanup()
 {
 	cleanupSwapChain();
+
 	vkDestroyDescriptorSetLayout(logicalDevice, descriptorSetLayout, nullptr);
 
 	vkDestroyBuffer(logicalDevice, indexBuffer, nullptr);
@@ -908,6 +897,7 @@ void HelloTriangleApplication::cleanup()
 	vkDestroyBuffer(logicalDevice, vertexBuffer, nullptr);
 	vkFreeMemory(logicalDevice, vertexBufferMemory, nullptr);
 
+	vkDestroyImageView(logicalDevice, textureImageView, nullptr);
 	vkDestroyImage(logicalDevice, textureImage, nullptr);
 	vkFreeMemory(logicalDevice, textureImageMemory, nullptr);
 
