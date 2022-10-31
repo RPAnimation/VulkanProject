@@ -12,8 +12,8 @@
 
 class HelloTriangleApplication
 {
-public:
-    const char* APP_NAME = "First Vulkan App";
+  public:
+	const char	                 *APP_NAME             = "First Vulkan App";
 	const char	                 *ENGINE_NAME          = "No engine";
 	const uint32_t                  WIDTH                = 800;
 	const uint32_t                  HEIGHT               = 600;
@@ -66,6 +66,7 @@ public:
 	VkImage        textureImage;
 	VkDeviceMemory textureImageMemory;
 	VkImageView    textureImageView;
+	VkSampler      textureSampler;
 
 	// Main phase
 	void initWindow();
@@ -91,6 +92,7 @@ public:
 	void createCommandPool();
 	void createTextureImage();
 	void createTextureImageView();
+	void createTextureSampler();
 	void createVertexBuffer();
 	void createIndexBuffer();
 	void createUniformBuffers();

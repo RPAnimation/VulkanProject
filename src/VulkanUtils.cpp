@@ -114,7 +114,7 @@ bool isDeviceSuitable(const VkPhysicalDevice device, const VkSurfaceKHR surface)
 
 	return (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU ||
 	        deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) &&
-	       deviceFeatures.geometryShader && indices.isComplete() && isSwapChainSupported && isSwapChainAdequate;
+	       deviceFeatures.geometryShader && indices.isComplete() && isSwapChainSupported && isSwapChainAdequate && deviceFeatures.samplerAnisotropy;
 }
 
 QueueFamiliyIndices findQueueFamilies(const VkPhysicalDevice &device, const VkSurfaceKHR &surface)
