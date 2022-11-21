@@ -393,7 +393,7 @@ void endSingleTimeCommands(const VkDevice &device, const VkCommandPool &commandP
 	vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
 }
 
-void transitionImageLayout(const VkDevice &device, const VkCommandPool &commandPool, const VkQueue &graphicsQueue, const VkImageLayout &oldLayout, const VkImageLayout &newLayout, VkImage &image)
+void transitionImageLayout(const VkDevice &device, const VkCommandPool &commandPool, const VkQueue &graphicsQueue, const VkImageLayout &oldLayout, const VkImageLayout &newLayout, VkImage &image, VkFormat format)
 {
 	VkCommandBuffer commandBuffer = beginSingleTimeCommands(commandPool, device);
 
@@ -404,7 +404,18 @@ void transitionImageLayout(const VkDevice &device, const VkCommandPool &commandP
 	barrier.srcQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
 	barrier.image                           = image;
-	barrier.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+	if (newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+	{
+		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+		if (format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT)
+		{
+			barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+		}
+	}
+	else
+	{
+		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	}
 	barrier.subresourceRange.baseMipLevel   = 0;
 	barrier.subresourceRange.levelCount     = 1;
 	barrier.subresourceRange.baseArrayLayer = 0;
@@ -430,6 +441,14 @@ void transitionImageLayout(const VkDevice &device, const VkCommandPool &commandP
 
 		sourceStage      = VK_PIPELINE_STAGE_TRANSFER_BIT;
 		destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	}
+	else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+	{
+		barrier.srcAccessMask = 0;
+		barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+		sourceStage      = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+		destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 	}
 	else
 	{
@@ -463,7 +482,7 @@ void copyBufferToImage(const VkDevice &device, const VkCommandPool &commandPool,
 	endSingleTimeCommands(device, commandPool, commandBuffer, graphicsQueue);
 }
 
-VkImageView createImageView(VkDevice device, VkImage image, VkFormat format)
+VkImageView createImageView(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags flags)
 {
 	VkImageViewCreateInfo createInfo{};
 	createInfo.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -474,7 +493,7 @@ VkImageView createImageView(VkDevice device, VkImage image, VkFormat format)
 	createInfo.components.r                    = VK_COMPONENT_SWIZZLE_IDENTITY;
 	createInfo.components.g                    = VK_COMPONENT_SWIZZLE_IDENTITY;
 	createInfo.components.b                    = VK_COMPONENT_SWIZZLE_IDENTITY;
-	createInfo.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+	createInfo.subresourceRange.aspectMask     = flags;
 	createInfo.subresourceRange.baseMipLevel   = 0;
 	createInfo.subresourceRange.levelCount     = 1;
 	createInfo.subresourceRange.baseArrayLayer = 0;
@@ -486,4 +505,22 @@ VkImageView createImageView(VkDevice device, VkImage image, VkFormat format)
 		throw std::runtime_error(err2msg(result));
 	}
 	return imageView;
+}
+
+VkFormat findSuitableFormat(const VkPhysicalDevice &physicalDevice, const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
+{
+	for (VkFormat format : candidates)
+	{
+		VkFormatProperties props;
+		vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
+		if (tiling == VK_IMAGE_TILING_LINEAR && (props.optimalTilingFeatures & features) == features)
+		{
+			return format;
+		}
+		else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)
+		{
+			return format;
+		}
+	}
+	throw std::runtime_error("Failed to find supported format!");
 }

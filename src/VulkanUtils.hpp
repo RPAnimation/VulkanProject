@@ -33,7 +33,7 @@ struct QueueFamiliyIndices
 
 struct Vertex
 {
-	glm::vec2 pos;
+	glm::vec3 pos;
 	glm::vec3 color;
 	glm::vec2 texCoord;
 
@@ -50,7 +50,7 @@ struct Vertex
 		std::array<VkVertexInputAttributeDescription, 3> description{};
 		description[0].binding  = 0;
 		description[0].location = 0;
-		description[0].format   = VK_FORMAT_R32G32_SFLOAT;
+		description[0].format   = VK_FORMAT_R32G32B32_SFLOAT;
 		description[0].offset   = offsetof(Vertex, pos);
 
 		description[1].binding = 0;
@@ -140,9 +140,12 @@ void createImage(int32_t textureWidth, int32_t textureHeight, const VkPhysicalDe
 VkCommandBuffer beginSingleTimeCommands(const VkCommandPool &commandPool, const VkDevice &device);
 void            endSingleTimeCommands(const VkDevice &device, const VkCommandPool &commandPool, const VkCommandBuffer &commandBuffer, const VkQueue &graphicsQueue);
 
-void transitionImageLayout(const VkDevice &device, const VkCommandPool &commandPool, const VkQueue &graphicsQueue, const VkImageLayout &oldLayout, const VkImageLayout &newLayout, VkImage &image);
+void transitionImageLayout(const VkDevice &device, const VkCommandPool &commandPool, const VkQueue &graphicsQueue, const VkImageLayout &oldLayout, const VkImageLayout &newLayout, VkImage &image, VkFormat format);
 
 void copyBufferToImage(const VkDevice &device, const VkCommandPool &commandPool, const VkQueue &graphicsQueue, VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 
-VkImageView createImageView(VkDevice device, VkImage image, VkFormat format);
+VkImageView createImageView(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags flags);
+
+VkFormat findSuitableFormat(const VkPhysicalDevice &physicalDevice, const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+
 #endif

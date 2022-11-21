@@ -68,6 +68,11 @@ class HelloTriangleApplication
 	VkImageView    textureImageView;
 	VkSampler      textureSampler;
 
+	// Depth
+	VkImage        depthImage;
+	VkDeviceMemory depthImageMemory;
+	VkImageView    depthImageView;
+
 	// Main phase
 	void initWindow();
 	void initVulkan();
@@ -90,6 +95,7 @@ class HelloTriangleApplication
 	void createGraphicsPipeline();
 	void createFramebuffers();
 	void createCommandPool();
+	void createDepthResources();
 	void createTextureImage();
 	void createTextureImageView();
 	void createTextureSampler();
