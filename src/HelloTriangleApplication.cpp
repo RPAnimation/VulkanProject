@@ -325,6 +325,7 @@ void HelloTriangleApplication::recreateSwapChain()
 	createImageViews();
 	createRenderPass();
 	createGraphicsPipeline();
+	createDepthResources();
 	createFramebuffers();
 	createUniformBuffers();
 	createDescriptorPool();
@@ -334,6 +335,10 @@ void HelloTriangleApplication::recreateSwapChain()
 
 void HelloTriangleApplication::cleanupSwapChain()
 {
+	vkDestroyImageView(logicalDevice, depthImageView, nullptr);
+	vkDestroyImage(logicalDevice, depthImage, nullptr);
+	vkFreeMemory(logicalDevice, depthImageMemory, nullptr);
+
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
 	{
 		vkDestroyBuffer(logicalDevice, uniformBuffers[i], nullptr);
@@ -1007,10 +1012,6 @@ void HelloTriangleApplication::mainLoop()
 void HelloTriangleApplication::cleanup()
 {
 	cleanupSwapChain();
-
-	vkDestroyImageView(logicalDevice, depthImageView, nullptr);
-	vkDestroyImage(logicalDevice, depthImage, nullptr);
-	vkFreeMemory(logicalDevice, depthImageMemory, nullptr);
 
 	vkDestroySampler(logicalDevice, textureSampler, nullptr);
 	vkDestroyImageView(logicalDevice, textureImageView, nullptr);
