@@ -131,9 +131,9 @@ void HelloTriangleApplication::initVulkan()
 	createRenderPass();
 	createDescriptorSetLayout();
 	createGraphicsPipeline();
-	createFramebuffers();
 	createCommandPool();
 	createDepthResources();
+	createFramebuffers();
 	createTextureImage();
 	createTextureImageView();
 	createTextureSampler();
@@ -436,23 +436,44 @@ void HelloTriangleApplication::createRenderPass()
 	colorAttachmentRef.attachment = 0;
 	colorAttachmentRef.layout     = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
 
+	VkAttachmentDescription depthAttachment{};
+	depthAttachment.format = findSuitableFormat(
+	    physicalDevice,
+	    {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+	    VK_IMAGE_TILING_OPTIMAL,
+	    VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+	depthAttachment.samples        = VK_SAMPLE_COUNT_1_BIT;
+	depthAttachment.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	depthAttachment.storeOp        = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	depthAttachment.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	depthAttachment.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
+	depthAttachment.finalLayout    = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+	VkAttachmentReference depthAttachmentRef{};
+	depthAttachmentRef.attachment = 1;
+	depthAttachmentRef.layout     = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
 	VkSubpassDescription subpass{};
 	subpass.pipelineBindPoint    = VK_PIPELINE_BIND_POINT_GRAPHICS;
 	subpass.colorAttachmentCount = 1;
 	subpass.pColorAttachments    = &colorAttachmentRef;
+	subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
 	VkSubpassDependency dependancy{};
 	dependancy.srcSubpass    = VK_SUBPASS_EXTERNAL;
 	dependancy.dstSubpass    = 0;
-	dependancy.srcStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependancy.srcStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 	dependancy.srcAccessMask = 0;
-	dependancy.dstStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependancy.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	dependancy.dstStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+	dependancy.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+	std::array<VkAttachmentDescription, 2> attachments = {colorAttachment, depthAttachment};
 
 	VkRenderPassCreateInfo renderPassCreateInfo{};
 	renderPassCreateInfo.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-	renderPassCreateInfo.attachmentCount = 1;
-	renderPassCreateInfo.pAttachments    = &colorAttachment;
+	renderPassCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+	renderPassCreateInfo.pAttachments    = attachments.data();
 	renderPassCreateInfo.subpassCount    = 1;
 	renderPassCreateInfo.pSubpasses      = &subpass;
 	renderPassCreateInfo.dependencyCount = 1;
@@ -614,6 +635,19 @@ void HelloTriangleApplication::createGraphicsPipeline()
 	{
 		throw std::runtime_error(err2msg(result));
 	}
+
+	VkPipelineDepthStencilStateCreateInfo depthStencilCreateInfo{};
+	depthStencilCreateInfo.sType                 = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+	depthStencilCreateInfo.depthTestEnable       = VK_TRUE;
+	depthStencilCreateInfo.depthWriteEnable      = VK_TRUE;
+	depthStencilCreateInfo.depthCompareOp        = VK_COMPARE_OP_LESS;
+	depthStencilCreateInfo.depthBoundsTestEnable = VK_FALSE;
+	depthStencilCreateInfo.minDepthBounds        = 0.0f;
+	depthStencilCreateInfo.maxDepthBounds        = 1.0f;
+	depthStencilCreateInfo.stencilTestEnable     = VK_FALSE;
+	depthStencilCreateInfo.front                 = {};
+	depthStencilCreateInfo.back                  = {};
+
 	VkGraphicsPipelineCreateInfo pipelineCreateInfo{};
 	pipelineCreateInfo.sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	pipelineCreateInfo.stageCount          = 2;
@@ -633,6 +667,8 @@ void HelloTriangleApplication::createGraphicsPipeline()
 	pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 	pipelineCreateInfo.basePipelineIndex  = -1;
 
+	pipelineCreateInfo.pDepthStencilState = &depthStencilCreateInfo;
+
 	result = vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &graphicsPipeline);
 	if (result != VK_SUCCESS)
 	{
@@ -647,13 +683,13 @@ void HelloTriangleApplication::createFramebuffers()
 	swapChainFramebuffers.resize(swapChainImageViews.size());
 	for (size_t i = 0; i < swapChainImageViews.size(); ++i)
 	{
-		VkImageView attachments[] = {swapChainImageViews[i]};
+		std::array<VkImageView, 2> attachments = {swapChainImageViews[i], depthImageView};
 
 		VkFramebufferCreateInfo frameBufferCreateInfo{};
 		frameBufferCreateInfo.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		frameBufferCreateInfo.renderPass      = renderPass;
-		frameBufferCreateInfo.attachmentCount = 1;
-		frameBufferCreateInfo.pAttachments    = attachments;
+		frameBufferCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+		frameBufferCreateInfo.pAttachments    = attachments.data();
 		frameBufferCreateInfo.width           = swapChainExtent.width;
 		frameBufferCreateInfo.height          = swapChainExtent.height;
 		frameBufferCreateInfo.layers          = 1;
@@ -911,6 +947,7 @@ void HelloTriangleApplication::createDescriptorSets()
 void HelloTriangleApplication::createCommandBuffers()
 {
 	commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+
 	VkCommandBufferAllocateInfo allocInfo{};
 	allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	allocInfo.commandPool        = commandPool;
@@ -1065,9 +1102,11 @@ void HelloTriangleApplication::recordCommandBuffer(VkCommandBuffer buffer, uint3
 	renderPassBeginInfo.renderArea.extent = swapChainExtent;
 	renderPassBeginInfo.renderArea.offset = {0, 0};
 
-	VkClearValue clearColor             = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
-	renderPassBeginInfo.clearValueCount = 1;
-	renderPassBeginInfo.pClearValues    = &clearColor;
+	std::array<VkClearValue, 2> clearValues{};
+	clearValues[0].color                = {{0.0f, 0.0f, 0.0f, 1.0f}};
+	clearValues[1].depthStencil         = {1.0f, 0};
+	renderPassBeginInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+	renderPassBeginInfo.pClearValues    = clearValues.data();
 
 	vkCmdBeginRenderPass(commandBuffers[currentFrame], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
