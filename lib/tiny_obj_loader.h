@@ -650,7 +650,7 @@ bool ParseTextureNameAndOption(std::string *texname, texture_option_t *texopt,
 
 #endif  // TINY_OBJ_LOADER_H_
 
-//#ifdef TINYOBJLOADER_IMPLEMENTATION
+#ifdef TINYOBJLOADER_IMPLEMENTATION
 #include <cassert>
 #include <cctype>
 #include <cmath>
@@ -674,8 +674,8 @@ bool ParseTextureNameAndOption(std::string *texname, texture_option_t *texopt,
 #			pragma clang diagnostic ignored "-Weverything"
 #		endif
 
-#		include <array>
 #		include "mapbox/earcut.hpp"
+#		include <array>
 
 #		ifdef __clang__
 #			pragma clang diagnostic pop
@@ -3446,5 +3446,5 @@ bool ObjReader::ParseFromString(const std::string &obj_text,
 #pragma clang diagnostic pop
 #endif
 }  // namespace tinyobj
-#ifdef LOL
+
 #endif
