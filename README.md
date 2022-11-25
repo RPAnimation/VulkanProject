@@ -6,3 +6,7 @@ Simple vulkan app that renders two projected rotating rectangles with texture ap
 ## Resources
 - [Vulkan Tutorial](https://vulkan-tutorial.com/)
 - [Salmon Sculpture Texture](https://commons.wikimedia.org/wiki/File:Spawning_salmon_sculpture,_Wetherby_(16th_October_2020).jpg)
+
+## External libraries
+- [STB (stb_image.h)](https://github.com/nothings/stb/blob/master/stb_image.h)
+- [Tiny obj loader (tiny_obj_loader.h)](https://github.com/tinyobjloader/tinyobjloader)
