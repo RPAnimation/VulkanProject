@@ -1,7 +1,7 @@
 # Vulkan project
-Simple vulkan app that renders a projected rotating rectangle with texture applied on it.
+Simple vulkan app that renders two projected rotating rectangles with texture applied on them.
 
-![Main window](screenshots/main_window_4.png)
+![Main window](screenshots/main_window_5.png)
 
 ## Resources
 - [Vulkan Tutorial](https://vulkan-tutorial.com/)
