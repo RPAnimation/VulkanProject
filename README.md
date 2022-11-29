@@ -1,7 +1,7 @@
 # Vulkan project
-Simple vulkan app that renders two projected rotating rectangles with texture applied on them.
+Simple vulkan app that renders a model Nefertiti bust from an `.obj` file with texture.
 
-![Main window](screenshots/main_window_5.png)
+![Main window](screenshots/main_window_6.png)
 
 ## Resources
 - [Vulkan Tutorial](https://vulkan-tutorial.com/)
