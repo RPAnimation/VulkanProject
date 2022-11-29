@@ -15,7 +15,8 @@ _deps
 .DS_STORE
 
 # ADDITIONAL
-build/
+release/
+debug/
 .vscode
 
 # VULKAN
