@@ -1,29 +1,19 @@
 #include "HelloTriangleApplication.hpp"
-#include "VulkanUtils.hpp"
+
 #include <chrono>
+#include <set>
+#include <unordered_map>
+
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <set>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
-
-const std::vector<Vertex> vertices = {
-    {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-    {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-    {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-    {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-
-    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-    {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-    {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-    {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}};
-
-const std::vector<uint16_t> indices = {0, 1, 2, 2, 3, 0,
-                                       4, 5, 6, 6, 7, 4};
 
 void HelloTriangleApplication::run()
 {
@@ -139,6 +129,7 @@ void HelloTriangleApplication::initVulkan()
 	createTextureImage();
 	createTextureImageView();
 	createTextureSampler();
+	loadModel();
 	createVertexBuffer();
 	createIndexBuffer();
 	createUniformBuffers();
@@ -742,7 +733,7 @@ void HelloTriangleApplication::createDepthResources()
 void HelloTriangleApplication::createTextureImage()
 {
 	int      texWidth, texHeight, texChannels;
-	stbi_uc *pixels = stbi_load("textures/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+	stbi_uc *pixels = stbi_load(MODEL_TEX_FILEPATH.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 	if (pixels == NULL)
 	{
 		throw std::runtime_error("Couldn't load texture");
@@ -809,6 +800,48 @@ void HelloTriangleApplication::createTextureSampler()
 	if (result != VK_SUCCESS)
 	{
 		throw std::runtime_error(err2msg(result));
+	}
+}
+
+void HelloTriangleApplication::loadModel()
+{
+	tinyobj::attrib_t                attrib;
+	std::vector<tinyobj::shape_t>    shapes;
+	std::vector<tinyobj::material_t> materials;
+	std::string                      warn, err;
+
+	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, MODEL_OBJ_FILEPATH.c_str()))
+	{
+		throw std::runtime_error(warn + err);
+	}
+
+	std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+
+	for (const auto &shape : shapes)
+	{
+		for (const auto &index : shape.mesh.indices)
+		{
+			Vertex vertex{};
+
+			vertex.pos = {
+			    attrib.vertices[3 * index.vertex_index + 0],
+			    attrib.vertices[3 * index.vertex_index + 1],
+			    attrib.vertices[3 * index.vertex_index + 2]};
+
+			vertex.texCoord = {
+			    attrib.texcoords[2 * index.texcoord_index + 0],
+			    1.0f - attrib.texcoords[2 * index.texcoord_index + 1]};
+
+			vertex.color = {1.0f, 1.0f, 1.0f};
+
+			if (uniqueVertices.count(vertex) == 0)
+			{
+				uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+				vertices.push_back(vertex);
+			}
+
+			indices.push_back(uniqueVertices[vertex]);
+		}
 	}
 }
 
@@ -1117,7 +1150,7 @@ void HelloTriangleApplication::recordCommandBuffer(VkCommandBuffer buffer, uint3
 	VkBuffer     vertexBuffers[] = {vertexBuffer};
 	VkDeviceSize offsets[]       = {0};
 	vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
-	vkCmdBindIndexBuffer(commandBuffers[currentFrame], indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+	vkCmdBindIndexBuffer(commandBuffers[currentFrame], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 	vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
 	vkCmdDrawIndexed(commandBuffers[currentFrame], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
@@ -1139,8 +1172,8 @@ void HelloTriangleApplication::updateUniformBuffer(uint32_t currentImage)
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
 	UniformBufferObject ubo{};
-	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.view  = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	ubo.view  = glm::lookAt(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	ubo.proj  = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;
 

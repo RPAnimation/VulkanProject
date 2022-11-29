@@ -10,6 +10,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include "VulkanUtils.hpp"
+
 class HelloTriangleApplication
 {
   public:
@@ -17,6 +19,8 @@ class HelloTriangleApplication
 	const char	                 *ENGINE_NAME          = "No engine";
 	const uint32_t                  WIDTH                = 800;
 	const uint32_t                  HEIGHT               = 600;
+	const std::string               MODEL_OBJ_FILEPATH   = "./models/nefertiti.obj";
+	const std::string               MODEL_TEX_FILEPATH   = "./textures/nefertiti.png";
 	const std::vector<const char *> validationLayers     = {"VK_LAYER_KHRONOS_validation"};
 	const int                       MAX_FRAMES_IN_FLIGHT = 2;
 	void                            run();
@@ -47,6 +51,9 @@ class HelloTriangleApplication
 	VkCommandPool              commandPool;
 
 	// Vertex/Index buffers -> UBO
+	std::vector<Vertex>   vertices;
+	std::vector<uint32_t> indices;
+
 	VkBuffer                     vertexBuffer;
 	VkDeviceMemory               vertexBufferMemory;
 	VkBuffer                     indexBuffer;
@@ -99,6 +106,7 @@ class HelloTriangleApplication
 	void createTextureImage();
 	void createTextureImageView();
 	void createTextureSampler();
+	void loadModel();
 	void createVertexBuffer();
 	void createIndexBuffer();
 	void createUniformBuffers();

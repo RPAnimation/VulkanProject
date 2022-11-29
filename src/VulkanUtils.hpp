@@ -1,11 +1,16 @@
 #ifndef VULKANUTILS_H
 #define VULKANUTILS_H
 
+#include <array>
+#include <optional>
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-#include <array>
+
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
-#include <optional>
+#include <glm/gtx/hash.hpp>
+
 #include <vulkan/vulkan.hpp>
 
 #ifdef NDEBUG
@@ -64,7 +69,23 @@ struct Vertex
 		description[2].offset   = offsetof(Vertex, texCoord);
 		return description;
 	}
+	bool operator==(const Vertex &other) const
+	{
+		return pos == other.pos && color == other.color && texCoord == other.texCoord;
+	}
 };
+
+namespace std
+{
+template <>
+struct hash<Vertex>
+{
+	size_t operator()(Vertex const &vertex) const
+	{
+		return ((hash<glm::vec3>()(vertex.pos) ^ (hash<glm::vec3>()(vertex.color) << 1) >> 1) ^ (hash<glm::vec2>()(vertex.texCoord) << 1));
+	}
+};
+}        // namespace std
 
 struct UniformBufferObject
 {
