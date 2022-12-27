@@ -70,6 +70,7 @@ class HelloTriangleApplication
 	std::vector<VkSemaphore> renderFinishedSemaphores;
 
 	// Textures
+	uint32_t       mipLevels;
 	VkImage        textureImage;
 	VkDeviceMemory textureImageMemory;
 	VkImageView    textureImageView;

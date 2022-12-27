@@ -154,19 +154,21 @@ void copyBuffer(VkBuffer             srcBuffer,
                 const VkDevice      &device,
                 const VkQueue       &graphicsQueue);
 
-void createImage(int32_t textureWidth, int32_t textureHeight, const VkPhysicalDevice &physicalDevice,
+void createImage(int32_t textureWidth, int32_t textureHeight, int32_t mipLevels, const VkPhysicalDevice &physicalDevice,
                  const VkDevice &logicalDevice, VkImage &textureImage, VkDeviceMemory &textureImageMemory,
                  VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties);
 
 VkCommandBuffer beginSingleTimeCommands(const VkCommandPool &commandPool, const VkDevice &device);
 void            endSingleTimeCommands(const VkDevice &device, const VkCommandPool &commandPool, const VkCommandBuffer &commandBuffer, const VkQueue &graphicsQueue);
 
-void transitionImageLayout(const VkDevice &device, const VkCommandPool &commandPool, const VkQueue &graphicsQueue, const VkImageLayout &oldLayout, const VkImageLayout &newLayout, VkImage &image, VkFormat format);
+void transitionImageLayout(const VkDevice &device, const VkCommandPool &commandPool, const VkQueue &graphicsQueue, const VkImageLayout &oldLayout, const VkImageLayout &newLayout, VkImage &image, VkFormat format, uint32_t mipLevels);
 
 void copyBufferToImage(const VkDevice &device, const VkCommandPool &commandPool, const VkQueue &graphicsQueue, VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 
-VkImageView createImageView(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags flags);
+VkImageView createImageView(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags flags, uint32_t mipLevels);
 
 VkFormat findSuitableFormat(const VkPhysicalDevice &physicalDevice, const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+
+void generateMipmaps(VkImage image, VkFormat format, int32_t texWidth, int32_t texHeight, uint32_t mipLevels, VkCommandPool commandPool, VkDevice device, VkQueue graphicsQueue, VkPhysicalDevice physicalDevice);
 
 #endif

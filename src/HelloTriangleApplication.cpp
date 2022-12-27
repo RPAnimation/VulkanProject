@@ -416,7 +416,7 @@ void HelloTriangleApplication::createImageViews()
 	swapChainImageViews.resize(swapChainImages.size());
 	for (size_t i = 0; i < swapChainImages.size(); ++i)
 	{
-		swapChainImageViews[i] = createImageView(logicalDevice, swapChainImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
+		swapChainImageViews[i] = createImageView(logicalDevice, swapChainImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 	}
 }
 
@@ -726,10 +726,10 @@ void HelloTriangleApplication::createDepthResources()
 	    VK_IMAGE_TILING_OPTIMAL,
 	    VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 
-	createImage(swapChainExtent.width, swapChainExtent.height, physicalDevice, logicalDevice, depthImage, depthImageMemory, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	depthImageView = createImageView(logicalDevice, depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+	createImage(swapChainExtent.width, swapChainExtent.height, 1, physicalDevice, logicalDevice, depthImage, depthImageMemory, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	depthImageView = createImageView(logicalDevice, depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 
-	transitionImageLayout(logicalDevice, commandPool, graphicsQueue, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, depthImage, depthFormat);
+	transitionImageLayout(logicalDevice, commandPool, graphicsQueue, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, depthImage, depthFormat, 1);
 }
 
 void HelloTriangleApplication::createTextureImage()
@@ -741,12 +741,14 @@ void HelloTriangleApplication::createTextureImage()
 		throw std::runtime_error("Couldn't load texture");
 	}
 
+	mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
+
 	VkDeviceSize   imageSize = texHeight * texHeight * 4;
 	VkBuffer       stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
 	createMemoryBuffer(logicalDevice, physicalDevice, imageSize,
 	                   VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-	                   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+	                   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
 	                   stagingBuffer, stagingBufferMemory);
 
 	void *data;
@@ -755,17 +757,17 @@ void HelloTriangleApplication::createTextureImage()
 	vkUnmapMemory(logicalDevice, stagingBufferMemory);
 	stbi_image_free(pixels);
 
-	createImage(texWidth, texHeight, physicalDevice,
+	createImage(texWidth, texHeight, mipLevels, physicalDevice,
 	            logicalDevice, textureImage, textureImageMemory,
 	            VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL,
-	            VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+	            VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 	            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-	transitionImageLayout(logicalDevice, commandPool, graphicsQueue, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, textureImage, swapChainImageFormat);
+	transitionImageLayout(logicalDevice, commandPool, graphicsQueue, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, textureImage, swapChainImageFormat, mipLevels);
 
 	copyBufferToImage(logicalDevice, commandPool, graphicsQueue, stagingBuffer, textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
 
-	transitionImageLayout(logicalDevice, commandPool, graphicsQueue, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, textureImage, swapChainImageFormat);
+	generateMipmaps(textureImage, VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, mipLevels, commandPool, logicalDevice, graphicsQueue, physicalDevice);
 
 	vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
 	vkFreeMemory(logicalDevice, stagingBufferMemory, nullptr);
@@ -773,7 +775,7 @@ void HelloTriangleApplication::createTextureImage()
 
 void HelloTriangleApplication::createTextureImageView()
 {
-	textureImageView = createImageView(logicalDevice, textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
+	textureImageView = createImageView(logicalDevice, textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels);
 }
 
 void HelloTriangleApplication::createTextureSampler()
@@ -796,7 +798,7 @@ void HelloTriangleApplication::createTextureSampler()
 	samplerCreateInfo.mipmapMode              = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 	samplerCreateInfo.mipLodBias              = 0.0f;
 	samplerCreateInfo.minLod                  = 0.0f;
-	samplerCreateInfo.maxLod                  = 0.0f;
+	samplerCreateInfo.maxLod                  = static_cast<float>(mipLevels);
 
 	VkResult result = vkCreateSampler(logicalDevice, &samplerCreateInfo, nullptr, &textureSampler);
 	if (result != VK_SUCCESS)
