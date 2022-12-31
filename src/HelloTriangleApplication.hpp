@@ -78,12 +78,18 @@ class HelloTriangleApplication
 
 	// Depth
 	VkImage        depthImage;
-	VkDeviceMemory depthImageMemory;
-	VkImageView    depthImageView;
+    VkDeviceMemory depthImageMemory;
+    VkImageView depthImageView;
 
-	// Main phase
-	void initWindow();
-	void initVulkan();
+    // MSAA
+    VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
+    VkImage colorImage;
+    VkDeviceMemory colorImageMemory;
+    VkImageView colorImageView;
+
+    // Main phase
+    void initWindow();
+    void initVulkan();
 	void mainLoop();
 	void drawFrame();
 	void cleanup();
@@ -103,7 +109,8 @@ class HelloTriangleApplication
 	void createGraphicsPipeline();
 	void createFramebuffers();
 	void createCommandPool();
-	void createDepthResources();
+    void createColorResources();
+    void createDepthResources();
 	void createTextureImage();
 	void createTextureImageView();
 	void createTextureSampler();

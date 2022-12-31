@@ -154,9 +154,18 @@ void copyBuffer(VkBuffer             srcBuffer,
                 const VkDevice      &device,
                 const VkQueue       &graphicsQueue);
 
-void createImage(int32_t textureWidth, int32_t textureHeight, int32_t mipLevels, const VkPhysicalDevice &physicalDevice,
-                 const VkDevice &logicalDevice, VkImage &textureImage, VkDeviceMemory &textureImageMemory,
-                 VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties);
+void createImage(int32_t textureWidth,
+                 int32_t textureHeight,
+                 int32_t mipLevels,
+                 VkSampleCountFlagBits numSamples,
+                 const VkPhysicalDevice &physicalDevice,
+                 const VkDevice &logicalDevice,
+                 VkImage &textureImage,
+                 VkDeviceMemory &textureImageMemory,
+                 VkFormat format,
+                 VkImageTiling tiling,
+                 VkImageUsageFlags usage,
+                 VkMemoryPropertyFlags properties);
 
 VkCommandBuffer beginSingleTimeCommands(const VkCommandPool &commandPool, const VkDevice &device);
 void            endSingleTimeCommands(const VkDevice &device, const VkCommandPool &commandPool, const VkCommandBuffer &commandBuffer, const VkQueue &graphicsQueue);
@@ -170,5 +179,7 @@ VkImageView createImageView(VkDevice device, VkImage image, VkFormat format, VkI
 VkFormat findSuitableFormat(const VkPhysicalDevice &physicalDevice, const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
 void generateMipmaps(VkImage image, VkFormat format, int32_t texWidth, int32_t texHeight, uint32_t mipLevels, VkCommandPool commandPool, VkDevice device, VkQueue graphicsQueue, VkPhysicalDevice physicalDevice);
+
+VkSampleCountFlagBits getMaxUsableSampleCount(VkPhysicalDevice physicalDevice);
 
 #endif

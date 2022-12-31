@@ -126,6 +126,7 @@ void HelloTriangleApplication::initVulkan()
 	createDescriptorSetLayout();
 	createGraphicsPipeline();
 	createCommandPool();
+	createColorResources();
 	createDepthResources();
 	createFramebuffers();
 	createTextureImage();
@@ -246,6 +247,7 @@ void HelloTriangleApplication::pickPhysicalDevice()
 		if (isDeviceSuitable(device, surface))
 		{
 			physicalDevice = device;
+			msaaSamples    = getMaxUsableSampleCount(physicalDevice);
 			break;
 		}
 	}
@@ -320,6 +322,7 @@ void HelloTriangleApplication::recreateSwapChain()
 	createImageViews();
 	createRenderPass();
 	createGraphicsPipeline();
+	createColorResources();
 	createDepthResources();
 	createFramebuffers();
 	createUniformBuffers();
@@ -330,6 +333,10 @@ void HelloTriangleApplication::recreateSwapChain()
 
 void HelloTriangleApplication::cleanupSwapChain()
 {
+	vkDestroyImageView(logicalDevice, colorImageView, nullptr);
+	vkDestroyImage(logicalDevice, colorImage, nullptr);
+	vkFreeMemory(logicalDevice, colorImageMemory, nullptr);
+
 	vkDestroyImageView(logicalDevice, depthImageView, nullptr);
 	vkDestroyImage(logicalDevice, depthImage, nullptr);
 	vkFreeMemory(logicalDevice, depthImageMemory, nullptr);
@@ -718,6 +725,15 @@ void HelloTriangleApplication::createCommandPool()
 	}
 }
 
+void HelloTriangleApplication::createColorResources()
+{
+	VkFormat colorFormat = swapChainImageFormat;
+
+	createImage(swapChainExtent.width, swapChainExtent.height, 1, msaaSamples, physicalDevice, logicalDevice, colorImage, colorImageMemory, colorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+	colorImageView = createImageView(logicalDevice, colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+}
+
 void HelloTriangleApplication::createDepthResources()
 {
 	VkFormat depthFormat = findSuitableFormat(
@@ -726,7 +742,7 @@ void HelloTriangleApplication::createDepthResources()
 	    VK_IMAGE_TILING_OPTIMAL,
 	    VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 
-	createImage(swapChainExtent.width, swapChainExtent.height, 1, physicalDevice, logicalDevice, depthImage, depthImageMemory, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	createImage(swapChainExtent.width, swapChainExtent.height, 1, msaaSamples, physicalDevice, logicalDevice, depthImage, depthImageMemory, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 	depthImageView = createImageView(logicalDevice, depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 
 	transitionImageLayout(logicalDevice, commandPool, graphicsQueue, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, depthImage, depthFormat, 1);
@@ -757,7 +773,7 @@ void HelloTriangleApplication::createTextureImage()
 	vkUnmapMemory(logicalDevice, stagingBufferMemory);
 	stbi_image_free(pixels);
 
-	createImage(texWidth, texHeight, mipLevels, physicalDevice,
+	createImage(texWidth, texHeight, mipLevels, VK_SAMPLE_COUNT_1_BIT, physicalDevice,
 	            logicalDevice, textureImage, textureImageMemory,
 	            VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL,
 	            VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,

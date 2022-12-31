@@ -319,7 +319,7 @@ void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size, const
 	endSingleTimeCommands(device, commandPool, commandBuffer, graphicsQueue);
 }
 
-void createImage(int32_t textureWidth, int32_t textureHeight, int32_t mipLevels, const VkPhysicalDevice &physicalDevice,
+void createImage(int32_t textureWidth, int32_t textureHeight, int32_t mipLevels, VkSampleCountFlagBits numSamples, const VkPhysicalDevice &physicalDevice,
                  const VkDevice &logicalDevice, VkImage &textureImage, VkDeviceMemory &textureImageMemory,
                  VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties)
 {
@@ -336,7 +336,7 @@ void createImage(int32_t textureWidth, int32_t textureHeight, int32_t mipLevels,
 	imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	imageCreateInfo.usage         = usage;
 	imageCreateInfo.sharingMode   = VK_SHARING_MODE_EXCLUSIVE;
-	imageCreateInfo.samples       = VK_SAMPLE_COUNT_1_BIT;
+	imageCreateInfo.samples       = numSamples;
 	imageCreateInfo.flags         = 0;
 
 	VkResult result = vkCreateImage(logicalDevice, &imageCreateInfo, nullptr, &textureImage);
@@ -605,4 +605,38 @@ void generateMipmaps(VkImage image, VkFormat format, int32_t texWidth, int32_t t
 	vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 
 	endSingleTimeCommands(device, commandPool, commandBuffer, graphicsQueue);
+}
+
+VkSampleCountFlagBits getMaxUsableSampleCount(VkPhysicalDevice physicalDevice)
+{
+	VkPhysicalDeviceProperties physicalDeviceProperties;
+	vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
+
+	VkSampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
+
+	if (counts & VK_SAMPLE_COUNT_64_BIT)
+	{
+		return VK_SAMPLE_COUNT_64_BIT;
+	}
+	if (counts & VK_SAMPLE_COUNT_32_BIT)
+	{
+		return VK_SAMPLE_COUNT_32_BIT;
+	}
+	if (counts & VK_SAMPLE_COUNT_16_BIT)
+	{
+		return VK_SAMPLE_COUNT_16_BIT;
+	}
+	if (counts & VK_SAMPLE_COUNT_8_BIT)
+	{
+		return VK_SAMPLE_COUNT_8_BIT;
+	}
+	if (counts & VK_SAMPLE_COUNT_4_BIT)
+	{
+		return VK_SAMPLE_COUNT_4_BIT;
+	}
+	if (counts & VK_SAMPLE_COUNT_2_BIT)
+	{
+		return VK_SAMPLE_COUNT_2_BIT;
+	}
+	return VK_SAMPLE_COUNT_1_BIT;
 }
