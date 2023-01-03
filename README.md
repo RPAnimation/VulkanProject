@@ -1,7 +1,22 @@
 # Vulkan project
-Simple vulkan app that renders a model Nefertiti bust from an `.obj` file with texture.
+Simple vulkan app that renders a model Nefertiti bust. It implements features as:
+- Multisampling,
+- Mipmapping,
+- Depth buffering.
 
 ![Main window](screenshots/main_window_7.png)
+
+## Requirements
+To compile this project, following libraries have to be installed:
+- [Vulkan SDK](https://github.com/LunarG/VulkanTools)
+- [Vulkan Validation Layers](https://github.com/KhronosGroup/Vulkan-ValidationLayers)
+- [GLFW](https://github.com/glfw/glfw)
+- [GLM](https://github.com/g-truc/glm)
+
+On arch-like systems following command takes care of it:
+```bash
+pacman -S vulkan-devel glfw-devel glm
+```
 
 ## Resources
 - [Vulkan Tutorial](https://vulkan-tutorial.com/)
