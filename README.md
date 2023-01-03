@@ -17,11 +17,20 @@ On arch-like systems following command takes care of it:
 ```bash
 pacman -S vulkan-devel glfw-devel glm
 ```
+## Compilation
+To compile the project using CMake:
+```
+git submodule update
+mkdir build && cd build
+cmake ..
+make -j${nprocs}
+./vulkan_project
+```
 
 ## Resources
 - [Vulkan Tutorial](https://vulkan-tutorial.com/)
 - [Salmon Sculpture Texture](https://commons.wikimedia.org/wiki/File:Spawning_salmon_sculpture,_Wetherby_(16th_October_2020).jpg)
-- [Efertiti's bust by C. Yamahata](https://sketchfab.com/3d-models/nefertitis-bust-like-in-the-museum-ce5b14926e494558ab584375a8d63ca7)
+- [Nefertiti's bust by C. Yamahata](https://sketchfab.com/3d-models/nefertitis-bust-like-in-the-museum-ce5b14926e494558ab584375a8d63ca7)
 
 ## External libraries
 - [STB (stb_image.h)](https://github.com/nothings/stb/blob/master/stb_image.h)
