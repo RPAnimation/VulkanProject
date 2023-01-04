@@ -12,7 +12,7 @@
 
 #include "VulkanUtils.hpp"
 
-class HelloTriangleApplication
+class VulkanApp
 {
   public:
 	const char	                 *APP_NAME             = "First Vulkan App";

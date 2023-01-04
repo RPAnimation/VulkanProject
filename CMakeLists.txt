@@ -6,17 +6,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE__CXX_FLAGS "-Wall -O2")
 
 if(APPLE)
-    find_package(vulkan REQUIRED FATAL_ERROR)
+    find_package(vulkan REQUIRE)
 else()
-    find_package(Vulkan REQUIRED FATAL_ERROR)
+    find_package(Vulkan REQUIRED)
 endif()
 
-find_package(glfw3 REQUIRED FATAL_ERROR)
-find_package(glm REQUIRED FATAL_ERROR)
+find_package(glfw3 REQUIRED)
+find_package(glm REQUIRED)
 
 set(EXEC_SOURCES
     src/main.cpp
-    src/HelloTriangleApplication.cpp
+    src/VulkanApp.cpp
     src/VulkanUtils.cpp
 )
 
