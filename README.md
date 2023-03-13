@@ -10,12 +10,10 @@ Simple vulkan app that renders a model Nefertiti bust. It implements features as
 To compile this project, following libraries have to be installed:
 - [Vulkan SDK](https://github.com/LunarG/VulkanTools)
 - [Vulkan Validation Layers](https://github.com/KhronosGroup/Vulkan-ValidationLayers)
-- [GLFW](https://github.com/glfw/glfw)
-- [GLM](https://github.com/g-truc/glm)
 
-On arch-like systems following command takes care of it:
+On arch-like systems following command installs them both:
 ```bash
-pacman -S vulkan-devel glfw-devel glm
+pacman -S vulkan-devel
 ```
 ## Compilation
 To compile the project using CMake:
@@ -34,3 +32,5 @@ make -j${nprocs}
 ## External libraries
 - [STB (stb_image.h)](https://github.com/nothings/stb/blob/master/stb_image.h)
 - [Tiny obj loader (tiny_obj_loader.h)](https://github.com/tinyobjloader/tinyobjloader/blob/release/tiny_obj_loader.h)
+- [GLFW](https://github.com/glfw/glfw)
+- [GLM](https://github.com/g-truc/glm)
