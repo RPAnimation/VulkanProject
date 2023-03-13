@@ -3,10 +3,10 @@ project(vulkan_project LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE__CXX_FLAGS "-Wall -O2")
+set(CMAKE_CXX_FLAGS "-Wall -O2")
 
 if(APPLE)
-    find_package(vulkan REQUIRE)
+    find_package(vulkan REQUIRED)
 else()
     find_package(Vulkan REQUIRED)
 endif()
@@ -18,11 +18,14 @@ set(EXEC_SOURCES
     src/main.cpp
     src/VulkanApp.cpp
     src/VulkanUtils.cpp
+    src/VulkanApp.hpp
+    src/VulkanUtils.hpp
 )
 
 add_executable(${PROJECT_NAME} ${EXEC_SOURCES})
 target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan glfw)
 include_directories("./lib")
+include_directories("./lib/glfw/include")
 
 # SHADERS
 set(GLSL_VALIDATOR "/usr/bin/glslangValidator")
@@ -50,6 +53,8 @@ add_custom_target(
 )
 
 add_dependencies(vulkan_project Shaders)
+
+# COPY COMMANDS
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:vulkan_project>/shaders/"

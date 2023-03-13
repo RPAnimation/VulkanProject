@@ -22,7 +22,7 @@ class VulkanApp
 	const std::string               MODEL_OBJ_FILEPATH   = "./models/nefertiti.obj";
 	const std::string               MODEL_TEX_FILEPATH   = "./textures/nefertiti.png";
 	const std::vector<const char *> validationLayers     = {"VK_LAYER_KHRONOS_validation"};
-	const int                       MAX_FRAMES_IN_FLIGHT = 2;
+	const size_t                    MAX_FRAMES_IN_FLIGHT = 2;
 	void                            run();
 	bool                            framebufferResized = false;
 
