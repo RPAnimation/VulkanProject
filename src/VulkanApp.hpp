@@ -47,10 +47,10 @@ class VulkanApp
 	VkDescriptorSetLayout      descriptorSetLayout;
 	VkPipelineLayout           pipelineLayout;
 	VkPipeline                 graphicsPipeline;
-	std::vector<VkFramebuffer> swapChainFramebuffers;
-	VkCommandPool              commandPool;
+    std::vector<VkFramebuffer> swapChainFramebuffers;
+    VkCommandPool commandPool;
 
-	// Vertex/Index buffers -> UBO
+    // Vertex/Index buffers -> UBO
 	std::vector<Vertex>   vertices;
 	std::vector<uint32_t> indices;
 
