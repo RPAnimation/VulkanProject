@@ -11,8 +11,15 @@ else()
     find_package(Vulkan REQUIRED)
 endif()
 
-find_package(glfw3 REQUIRED)
-find_package(glm REQUIRED)
+
+add_subdirectory(./lib/glfw EXCLUDE_FROM_ALL)
+add_subdirectory(./lib/glm EXCLUDE_FROM_ALL)
+
+
+#set(glm_DIR lib/glm/glm)
+
+#find_package(glfw3 REQUIRED)
+#find_package(glm REQUIRED)
 
 set(EXEC_SOURCES
     src/main.cpp
@@ -23,9 +30,15 @@ set(EXEC_SOURCES
 )
 
 add_executable(${PROJECT_NAME} ${EXEC_SOURCES})
-target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan glfw)
-include_directories("./lib")
-include_directories("./lib/glfw/include")
+target_link_libraries(${PROJECT_NAME}
+    PRIVATE glfw
+    PRIVATE glm
+    PRIVATE Vulkan::Vulkan
+)
+include_directories(
+    "./lib"
+    "./lib/glfw/include"
+)
 
 # SHADERS
 set(GLSL_VALIDATOR "/usr/bin/glslangValidator")
