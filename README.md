@@ -13,12 +13,12 @@ To compile this project, following libraries have to be installed:
 
 On arch-like systems following command installs them both:
 ```bash
-pacman -S vulkan-devel
+pacman -S vulkan-devel glslang
 ```
 ## Compilation
 To compile the project using CMake:
 ```
-git submodule update
+git submodule update --init --recursive
 mkdir build && cd build
 cmake ..
 make -j${nprocs}
