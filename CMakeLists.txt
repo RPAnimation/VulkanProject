@@ -11,15 +11,8 @@ else()
     find_package(Vulkan REQUIRED)
 endif()
 
-
 add_subdirectory(./lib/glfw EXCLUDE_FROM_ALL)
 add_subdirectory(./lib/glm EXCLUDE_FROM_ALL)
-
-
-#set(glm_DIR lib/glm/glm)
-
-#find_package(glfw3 REQUIRED)
-#find_package(glm REQUIRED)
 
 set(EXEC_SOURCES
     src/main.cpp
